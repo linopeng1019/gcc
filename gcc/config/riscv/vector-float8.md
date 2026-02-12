@@ -64,6 +64,12 @@
    (UNSPEC_F8E4M3_SAT "f8e4m3_sat")
    (UNSPEC_F8E5M2_SAT "f8e5m2_sat")])
 
+(define_int_attr altfmt_kind
+  [(UNSPEC_F8E4M3     "none")
+   (UNSPEC_F8E5M2     "alt")
+   (UNSPEC_F8E4M3_SAT "none")
+   (UNSPEC_F8E5M2_SAT "alt")])
+
 (define_int_attr sat
   [(UNSPEC_F8E4M3     "")
    (UNSPEC_F8E5M2     "")
@@ -90,7 +96,8 @@
   "TARGET_VECTOR && TARGET_ZVFOFP8MIN && TARGET_ZVFBFMIN"
   "vfwcvtbf16.f.f.v\t%0,%3%p1"
   [(set_attr "type" "vfwcvtbf16")
-   (set_attr "mode" "<VBF_DOUBLE_TRUNC>")])
+   (set_attr "mode" "<VBF_DOUBLE_TRUNC>")
+   (set_attr "altfmt" "<altfmt_kind>")])
 
 ;; Zvfofp8min extension: BF16 to FP8 narrowing conversions.
 
@@ -115,6 +122,7 @@
   "vfncvtbf16<sat>.f.f.w\t%0,%3%p1"
   [(set_attr "type" "vfncvtbf16")
    (set_attr "mode" "<VBF_DOUBLE_TRUNC>")
+   (set_attr "altfmt" "<altfmt_kind>")
    (set (attr "frm_mode")
    (symbol_ref "riscv_vector::get_frm_mode (operands[8])"))])
 
@@ -141,5 +149,6 @@
   "vfncvt<sat>.f.f.q\t%0,%3%p1"
   [(set_attr "type" "vfncvtbf16")
    (set_attr "mode" "<VF_QUAD_TRUNC>")
+   (set_attr "altfmt" "<altfmt_kind>")
    (set (attr "frm_mode")
    (symbol_ref "riscv_vector::get_frm_mode (operands[8])"))])
