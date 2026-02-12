@@ -2060,6 +2060,15 @@ static CONSTEXPR const rvv_op_info f_to_nf_f_w_ops
 
 /* A static operand information for vector_type func (vector_type)
  * function registration. */
+static CONSTEXPR const rvv_op_info bf16_to_f8_f_w_ops
+  = {bf_ops,	  /* Types */
+     OP_TYPE_f_w, /* Suffix */
+     rvv_arg_type_info (
+       RVV_BASE_double_trunc_unsigned_vector), /* Return type */
+     v_args /* Args */};
+
+/* A static operand information for vector_type func (vector_type)
+ * function registration. */
 static CONSTEXPR const rvv_op_info f8_to_bf16_f_v_ops
   = {bf_ops,				  /* Types */
      OP_TYPE_f_v,			  /* Suffix */

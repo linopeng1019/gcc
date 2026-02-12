@@ -35,10 +35,18 @@
   (RVVMF4BF "RVVMF8QI")
 ])
 
-(define_int_iterator ALTFMT [UNSPEC_F8E4M3 UNSPEC_F8E5M2])
+(define_int_iterator ALTFMT [UNSPEC_F8E4M3 UNSPEC_F8E5M2 UNSPEC_F8E4M3_SAT UNSPEC_F8E5M2_SAT])
 (define_int_attr altfmt
   [(UNSPEC_F8E4M3     "f8e4m3")
-   (UNSPEC_F8E5M2     "f8e5m2")])
+   (UNSPEC_F8E5M2     "f8e5m2")
+   (UNSPEC_F8E4M3_SAT "f8e4m3_sat")
+   (UNSPEC_F8E5M2_SAT "f8e5m2_sat")])
+
+(define_int_attr sat
+  [(UNSPEC_F8E4M3     "")
+   (UNSPEC_F8E5M2     "")
+   (UNSPEC_F8E4M3_SAT ".sat")
+   (UNSPEC_F8E5M2_SAT ".sat")])
 
 ;; Zvfofp8min extension: FP8 to BF16 widening conversions.
 
@@ -61,3 +69,29 @@
   "vfwcvtbf16.f.f.v\t%0,%3%p1"
   [(set_attr "type" "vfwcvtbf16")
    (set_attr "mode" "<VBF_DOUBLE_TRUNC>")])
+
+;; Zvfofp8min extension: BF16 to FP8 narrowing conversions.
+
+(define_insn "@pred_trunc_<mode>_to_<altfmt>"
+  [(set (match_operand:<VBF_DOUBLE_TRUNC> 0 "register_operand"   "=vd, vd, vr, vr,  &vr,  &vr")
+    (if_then_else:<VBF_DOUBLE_TRUNC>
+        (unspec:<VM>
+        [(match_operand:<VM> 1 "vector_mask_operand"            " vm, vm,Wc1,Wc1,vmWc1,vmWc1")
+        (match_operand 4 "vector_length_operand"               " rK, rK, rK, rK,   rK,   rK")
+        (match_operand 5 "const_int_operand"                   "  i,  i,  i,  i,    i,    i")
+        (match_operand 6 "const_int_operand"                   "  i,  i,  i,  i,    i,    i")
+        (match_operand 7 "const_int_operand"                   "  i,  i,  i,  i,    i,    i")
+        (match_operand 8 "const_int_operand"                   "  i,  i,  i,  i,    i,    i")
+        (reg:SI VL_REGNUM)
+        (reg:SI VTYPE_REGNUM)
+        (reg:SI FRM_REGNUM)] UNSPEC_VPREDICATE)
+	  (unspec:<VBF_DOUBLE_TRUNC>
+        [(float_truncate:<VBF_DOUBLE_TRUNC>
+	    (match_operand:VWEXTF_ZVFOFP8MIN 3 "register_operand"      "  0,  0,  0,  0,   vr,   vr"))] ALTFMT)
+        (match_operand:<VBF_DOUBLE_TRUNC> 2 "vector_merge_operand"  " vu,  0, vu,  0,   vu,    0")))]
+  "TARGET_VECTOR && TARGET_ZVFOFP8MIN && TARGET_ZVFBFMIN"
+  "vfncvtbf16<sat>.f.f.w\t%0,%3%p1"
+  [(set_attr "type" "vfncvtbf16")
+   (set_attr "mode" "<VBF_DOUBLE_TRUNC>")
+   (set (attr "frm_mode")
+   (symbol_ref "riscv_vector::get_frm_mode (operands[8])"))])

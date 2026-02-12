@@ -67,6 +67,10 @@ extern const function_shape *const sf_vcix;
 /* Zvfofp8min extension.  */
 extern const function_shape *const alu_f8e4m3;
 extern const function_shape *const alu_f8e5m2;
+extern const function_shape *const narrow_alu_f8e4m3;
+extern const function_shape *const narrow_alu_f8e5m2;
+extern const function_shape *const narrow_alu_frm_f8e4m3;
+extern const function_shape *const narrow_alu_frm_f8e5m2;
 }
 
 } // end namespace riscv_vector

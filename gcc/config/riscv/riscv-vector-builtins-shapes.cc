@@ -96,7 +96,11 @@ supports_vectype_p (const function_group_info &group, unsigned int vec_type_idx)
       || *group.shape == shapes::seg_indexed_loadstore
       || *group.shape == shapes::seg_fault_load
       || *group.shape == shapes::alu_f8e4m3
-      || *group.shape == shapes::alu_f8e5m2)
+      || *group.shape == shapes::alu_f8e5m2
+      || *group.shape == shapes::narrow_alu_f8e4m3
+      || *group.shape == shapes::narrow_alu_f8e5m2
+      || *group.shape == shapes::narrow_alu_frm_f8e4m3
+      || *group.shape == shapes::narrow_alu_frm_f8e5m2)
     return true;
   return false;
 }
@@ -794,6 +798,97 @@ struct narrow_alu_def : public build_base
 	   rounding mode in the future.  */
       }
     return true;
+  }
+};
+
+static char *
+build_f8_narrow_name (function_builder &b, const function_instance &instance,
+		      bool overloaded_p, const char *altfmt, bool frm_p)
+{
+  if (overloaded_p && !instance.base->can_be_overloaded_p (instance.pred))
+    return nullptr;
+
+  const char *base_name = instance.base_name;
+  char base_name_buf[BASE_NAME_MAX_LEN] = {};
+  if (frm_p)
+    {
+      build_frm_base::normalize_base_name (base_name_buf, instance.base_name,
+					   sizeof (base_name_buf));
+      base_name = base_name_buf;
+    }
+
+  b.append_base_name (base_name);
+
+  if (overloaded_p)
+    {
+      vector_type_index vti
+	= instance.op_info->args[0].get_function_type_index (
+	  instance.type.index);
+      const char *src_scalar
+	= vti == VECTOR_TYPE_INVALID ? nullptr : type_suffixes[vti].scalar;
+      b.append_name (src_scalar ? src_scalar : "_bf16");
+      b.append_name ("_");
+      b.append_name (altfmt);
+    }
+  else
+    {
+      b.append_name (operand_suffixes[instance.op_info->op]);
+      vector_type_index vti
+	= instance.op_info->args[0].get_function_type_index (
+	  instance.type.index);
+      if (vti != VECTOR_TYPE_INVALID)
+	b.append_name (type_suffixes[vti].vector);
+      append_f8_suffix (b,
+			instance.op_info->ret.get_function_type_index (
+			  instance.type.index),
+			altfmt);
+      if (frm_p)
+	b.append_name ("_rm");
+    }
+
+  if (overloaded_p && instance.pred == PRED_TYPE_m)
+    return b.finish_name ();
+  b.append_name (predication_suffixes[instance.pred]);
+  return b.finish_name ();
+}
+
+/* narrow_alu_f8e4m3_def class.  */
+struct narrow_alu_f8e4m3_def : public narrow_alu_def
+{
+  char *get_name (function_builder &b, const function_instance &instance,
+		  bool overloaded_p) const override
+  {
+    return build_f8_narrow_name (b, instance, overloaded_p, "f8e4m3", false);
+  }
+};
+
+/* narrow_alu_f8e5m2_def class.  */
+struct narrow_alu_f8e5m2_def : public narrow_alu_def
+{
+  char *get_name (function_builder &b, const function_instance &instance,
+		  bool overloaded_p) const override
+  {
+    return build_f8_narrow_name (b, instance, overloaded_p, "f8e5m2", false);
+  }
+};
+
+/* narrow_alu_frm_f8e4m3_def class.  */
+struct narrow_alu_frm_f8e4m3_def : public narrow_alu_frm_def
+{
+  char *get_name (function_builder &b, const function_instance &instance,
+		  bool overloaded_p) const override
+  {
+    return build_f8_narrow_name (b, instance, overloaded_p, "f8e4m3", true);
+  }
+};
+
+/* narrow_alu_frm_f8e5m2_def class.  */
+struct narrow_alu_frm_f8e5m2_def : public narrow_alu_frm_def
+{
+  char *get_name (function_builder &b, const function_instance &instance,
+		  bool overloaded_p) const override
+  {
+    return build_f8_narrow_name (b, instance, overloaded_p, "f8e5m2", true);
   }
 };
 
@@ -1505,4 +1600,8 @@ SHAPE(sf_vcix, sf_vcix)
 /* Zvfofp8min */
 SHAPE (alu_f8e4m3, alu_f8e4m3)
 SHAPE (alu_f8e5m2, alu_f8e5m2)
+SHAPE (narrow_alu_f8e4m3, narrow_alu_f8e4m3)
+SHAPE (narrow_alu_f8e5m2, narrow_alu_f8e5m2)
+SHAPE (narrow_alu_frm_f8e4m3, narrow_alu_frm_f8e4m3)
+SHAPE (narrow_alu_frm_f8e5m2, narrow_alu_frm_f8e5m2)
 } // end namespace riscv_vector

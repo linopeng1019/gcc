@@ -1526,12 +1526,15 @@ enum altfmt
 static altfmt
 get_altfmt (const function_expander &e)
 {
-  if (e.shape == shapes::alu_f8e4m3)
+  if (e.shape == shapes::alu_f8e4m3 || e.shape == shapes::narrow_alu_f8e4m3
+      || e.shape == shapes::narrow_alu_frm_f8e4m3)
     return F8E4M3;
-  if (e.shape == shapes::alu_f8e5m2)
+  if (e.shape == shapes::alu_f8e5m2 || e.shape == shapes::narrow_alu_f8e5m2
+      || e.shape == shapes::narrow_alu_frm_f8e5m2)
     return F8E5M2;
   return F8NONE;
 }
+
 class vfwcvt_f : public function_base
 {
 public:
@@ -1604,12 +1607,55 @@ public:
   rtx expand (function_expander &e) const override
   {
     if (e.op_info->op == OP_TYPE_f_w)
-      return e.use_exact_insn (code_for_pred_trunc (e.vector_mode ()));
+      {
+	switch (get_altfmt (e))
+	  {
+	  case F8E4M3:
+	    return e.use_exact_insn (
+	      code_for_pred_trunc_to (e.vector_mode (), UNSPEC_F8E4M3));
+	  case F8E5M2:
+	    return e.use_exact_insn (
+	      code_for_pred_trunc_to (e.vector_mode (), UNSPEC_F8E5M2));
+	  default:
+	    return e.use_exact_insn (code_for_pred_trunc (e.vector_mode ()));
+	  }
+      }
     if (e.op_info->op == OP_TYPE_x_w)
       return e.use_exact_insn (code_for_pred_narrow (FLOAT, e.arg_mode (0)));
     if (e.op_info->op == OP_TYPE_xu_w)
       return e.use_exact_insn (
 	code_for_pred_narrow (UNSIGNED_FLOAT, e.arg_mode (0)));
+    gcc_unreachable ();
+  }
+};
+
+template <enum frm_op_type FRM_OP = NO_FRM>
+class vfncvt_sat_f : public function_base
+{
+public:
+  bool has_rounding_mode_operand_p () const override
+  {
+    return FRM_OP == HAS_FRM;
+  }
+
+  bool may_require_frm_p () const override { return true; }
+
+  rtx expand (function_expander &e) const override
+  {
+    if (e.op_info->op == OP_TYPE_f_w)
+      {
+	switch (get_altfmt (e))
+	  {
+	  case F8E4M3:
+	    return e.use_exact_insn (
+	      code_for_pred_trunc_to (e.vector_mode (), UNSPEC_F8E4M3_SAT));
+	  case F8E5M2:
+	    return e.use_exact_insn (
+	      code_for_pred_trunc_to (e.vector_mode (), UNSPEC_F8E5M2_SAT));
+	  default:
+	    break;
+	  }
+      }
     gcc_unreachable ();
   }
 };
@@ -2809,6 +2855,9 @@ static CONSTEXPR const vfwcvtbf16_f vfwcvtbf16_f_obj;
 /* Zvfbfwma; */
 static CONSTEXPR const vfwmaccbf16<NO_FRM> vfwmaccbf16_obj;
 static CONSTEXPR const vfwmaccbf16<HAS_FRM> vfwmaccbf16_frm_obj;
+/* Zvfofp8min */
+static CONSTEXPR const vfncvt_sat_f<NO_FRM> vfncvt_sat_f_obj;
+static CONSTEXPR const vfncvt_sat_f<HAS_FRM> vfncvt_sat_f_frm_obj;
 
 /* Declare the function base NAME, pointing it to an instance
    of class <NAME>_obj.  */
@@ -3137,4 +3186,7 @@ BASE (vfwcvtbf16_f)
 /* Zvfbfwma */
 BASE (vfwmaccbf16)
 BASE (vfwmaccbf16_frm)
+/* Zvfofp8min */
+BASE (vfncvt_sat_f)
+BASE (vfncvt_sat_f_frm)
 } // end namespace riscv_vector

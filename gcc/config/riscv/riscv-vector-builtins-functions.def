@@ -773,6 +773,15 @@ DEF_RVV_FUNCTION (vfwcvtbf16_f, alu, full_preds, bf16_to_f32_f_v_ops)
 #define REQUIRED_EXTENSIONS ZVFOFP8MIN_EXT
 DEF_RVV_FUNCTION (vfwcvt_f, alu_f8e4m3, full_preds, f8_to_bf16_f_v_ops)
 DEF_RVV_FUNCTION (vfwcvt_f, alu_f8e5m2, full_preds, f8_to_bf16_f_v_ops)
+DEF_RVV_FUNCTION (vfncvt_f, narrow_alu_f8e4m3, full_preds, bf16_to_f8_f_w_ops)
+DEF_RVV_FUNCTION (vfncvt_f, narrow_alu_f8e5m2, full_preds, bf16_to_f8_f_w_ops)
+DEF_RVV_FUNCTION (vfncvt_sat_f, narrow_alu_f8e4m3, full_preds, bf16_to_f8_f_w_ops)
+DEF_RVV_FUNCTION (vfncvt_sat_f, narrow_alu_f8e5m2, full_preds, bf16_to_f8_f_w_ops)
+
+DEF_RVV_FUNCTION (vfncvt_f_frm, narrow_alu_frm_f8e4m3, full_preds, bf16_to_f8_f_w_ops)
+DEF_RVV_FUNCTION (vfncvt_f_frm, narrow_alu_frm_f8e5m2, full_preds, bf16_to_f8_f_w_ops)
+DEF_RVV_FUNCTION (vfncvt_sat_f_frm, narrow_alu_frm_f8e4m3, full_preds, bf16_to_f8_f_w_ops)
+DEF_RVV_FUNCTION (vfncvt_sat_f_frm, narrow_alu_frm_f8e5m2, full_preds, bf16_to_f8_f_w_ops)
 #undef REQUIRED_EXTENSIONS
 
 /* Zvfbfwma */
