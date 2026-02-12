@@ -103,6 +103,11 @@
   ;; Stack Smash Protector
   UNSPEC_SSP_SET
   UNSPEC_SSP_TEST
+  ;; Zvfofp8min
+  UNSPEC_F8E4M3
+  UNSPEC_F8E5M2
+  UNSPEC_F8E4M3_SAT
+  UNSPEC_F8E5M2_SAT
 ])
 
 (define_c_enum "unspecv" [
@@ -4971,6 +4976,7 @@
 (include "vector.md")
 (include "vector-crypto.md")
 (include "vector-bfloat16.md")
+(include "vector-float8.md")
 (include "zicond.md")
 (include "mips-insn.md")
 (include "sfb.md")

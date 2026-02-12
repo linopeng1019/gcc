@@ -64,6 +64,9 @@ extern const function_shape *const sf_vqmacc;
 extern const function_shape *const sf_vfnrclip;
 extern const function_shape *const sf_vcix_se;
 extern const function_shape *const sf_vcix;
+/* Zvfofp8min extension.  */
+extern const function_shape *const alu_f8e4m3;
+extern const function_shape *const alu_f8e5m2;
 }
 
 } // end namespace riscv_vector

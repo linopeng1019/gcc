@@ -1516,13 +1516,41 @@ public:
   }
 };
 
+enum altfmt
+{
+  F8NONE,
+  F8E4M3,
+  F8E5M2
+};
+
+static altfmt
+get_altfmt (const function_expander &e)
+{
+  if (e.shape == shapes::alu_f8e4m3)
+    return F8E4M3;
+  if (e.shape == shapes::alu_f8e5m2)
+    return F8E5M2;
+  return F8NONE;
+}
 class vfwcvt_f : public function_base
 {
 public:
   rtx expand (function_expander &e) const override
   {
     if (e.op_info->op == OP_TYPE_f_v)
-      return e.use_exact_insn (code_for_pred_extend (e.vector_mode ()));
+      {
+	switch (get_altfmt (e))
+	  {
+	  case F8E4M3:
+	    return e.use_exact_insn (
+	      code_for_pred_extend_to (UNSPEC_F8E4M3, e.vector_mode ()));
+	  case F8E5M2:
+	    return e.use_exact_insn (
+	      code_for_pred_extend_to (UNSPEC_F8E5M2, e.vector_mode ()));
+	  default:
+	    return e.use_exact_insn (code_for_pred_extend (e.vector_mode ()));
+	  }
+      }
     if (e.op_info->op == OP_TYPE_x_v)
       return e.use_exact_insn (code_for_pred_widen (FLOAT, e.vector_mode ()));
     if (e.op_info->op == OP_TYPE_xu_v)

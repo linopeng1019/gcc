@@ -42,6 +42,12 @@ along with GCC; see the file COPYING3. If not see
 #define DEF_RVV_B_OPS(TYPE, REQUIRE)
 #endif
 
+/* Use "DEF_RVV_BF_OPS" macro include bfloat16 floating-point which will be
+   iterated and registered as intrinsic functions.  */
+#ifndef DEF_RVV_BF_OPS
+#define DEF_RVV_BF_OPS(TYPE, REQUIRE)
+#endif
+
 /* Use "DEF_RVV_WEXTI_OPS" macro include Double-Widening signed integer which
    will be iterated and registered as intrinsic functions.  */
 #ifndef DEF_RVV_WEXTI_OPS
@@ -476,6 +482,13 @@ DEF_RVV_B_OPS (vbool8_t, 0)
 DEF_RVV_B_OPS (vbool4_t, 0)
 DEF_RVV_B_OPS (vbool2_t, 0)
 DEF_RVV_B_OPS (vbool1_t, 0)
+
+DEF_RVV_BF_OPS (vbfloat16mf4_t, RVV_REQUIRE_ELEN_BF_16 | RVV_REQUIRE_ELEN_64)
+DEF_RVV_BF_OPS (vbfloat16mf2_t, RVV_REQUIRE_ELEN_BF_16)
+DEF_RVV_BF_OPS (vbfloat16m1_t,  RVV_REQUIRE_ELEN_BF_16)
+DEF_RVV_BF_OPS (vbfloat16m2_t,  RVV_REQUIRE_ELEN_BF_16)
+DEF_RVV_BF_OPS (vbfloat16m4_t,  RVV_REQUIRE_ELEN_BF_16)
+DEF_RVV_BF_OPS (vbfloat16m8_t,  RVV_REQUIRE_ELEN_BF_16)
 
 DEF_RVV_WEXTI_OPS (vint16mf4_t, RVV_REQUIRE_ELEN_64)
 DEF_RVV_WEXTI_OPS (vint16mf2_t, 0)
@@ -1546,6 +1559,7 @@ DEF_RVV_F16_OPS (vfloat16m8_t, RVV_REQUIRE_ELEN_FP_16)
 #undef DEF_RVV_U_OPS
 #undef DEF_RVV_F_OPS
 #undef DEF_RVV_B_OPS
+#undef DEF_RVV_BF_OPS
 #undef DEF_RVV_WEXTI_OPS
 #undef DEF_RVV_QEXTI_OPS
 #undef DEF_RVV_OEXTI_OPS

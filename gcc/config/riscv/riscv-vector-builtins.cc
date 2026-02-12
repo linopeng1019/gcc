@@ -277,6 +277,12 @@ static const rvv_type_info b_ops[] = {
 #include "riscv-vector-builtins-types.def"
   {NUM_VECTOR_TYPES, 0}};
 
+/* A list of all bfloat will be registered for intrinsic functions.  */
+static const rvv_type_info bf_ops[] = {
+#define DEF_RVV_BF_OPS(TYPE, REQUIRE) {VECTOR_TYPE_##TYPE, REQUIRE},
+#include "riscv-vector-builtins-types.def"
+  {NUM_VECTOR_TYPES, 0}};
+
 /* A list of all float will be registered for intrinsic functions.  */
 static const rvv_type_info f_ops[] = {
 #define DEF_RVV_F_OPS(TYPE, REQUIRE) {VECTOR_TYPE_##TYPE, REQUIRE},
@@ -2051,6 +2057,14 @@ static CONSTEXPR const rvv_op_info f_to_nf_f_w_ops
      OP_TYPE_f_w,					     /* Suffix */
      rvv_arg_type_info (RVV_BASE_double_trunc_float_vector), /* Return type */
      v_args /* Args */};
+
+/* A static operand information for vector_type func (vector_type)
+ * function registration. */
+static CONSTEXPR const rvv_op_info f8_to_bf16_f_v_ops
+  = {bf_ops,				  /* Types */
+     OP_TYPE_f_v,			  /* Suffix */
+     rvv_arg_type_info (RVV_BASE_vector), /* Return type */
+     w_xu_v_args /* Args */};
 
 /* A static operand information for vector_type func (vector_type)
  * function registration. */
