@@ -155,6 +155,9 @@ set POLICY [list {policy} {non-policy} ]
 set OVERLOAD [list {overloaded} {non-overloaded} ]
 foreach po $POLICY {
   foreach ov $OVERLOAD {
+    # For Zvfofp8min feature tests
+    dg-runtest [lsort [glob -nocomplain $srcdir/$subdir/zvfofp8min/$po/$ov/*.\[cS\]]] \
+      "" $CFLAGS
     # For Andes Vector feature tests
     dg-runtest [lsort [glob -nocomplain $srcdir/$subdir/xandesvector/$po/$ov/*.\[cS\]]] \
       "" $CFLAGS
