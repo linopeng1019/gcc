@@ -2069,6 +2069,14 @@ static CONSTEXPR const rvv_op_info bf16_to_f8_f_w_ops
 
 /* A static operand information for vector_type func (vector_type)
  * function registration. */
+static CONSTEXPR const rvv_op_info f32_to_f8_f_q_ops
+  = {f32_ops,						      /* Types */
+     OP_TYPE_f_q,					      /* Suffix */
+     rvv_arg_type_info (RVV_BASE_quad_trunc_unsigned_vector), /* Return type */
+     v_args /* Args */};
+
+/* A static operand information for vector_type func (vector_type)
+ * function registration. */
 static CONSTEXPR const rvv_op_info f8_to_bf16_f_v_ops
   = {bf_ops,				  /* Types */
      OP_TYPE_f_v,			  /* Suffix */
@@ -3468,20 +3476,21 @@ static CONSTEXPR const rvv_op_info sf_vc_v_fvw_ops
 static CONSTEXPR const function_type_info function_types[] = {
 #define DEF_RVV_TYPE_INDEX(                                                    \
   VECTOR, MASK, SIGNED, UNSIGNED, SIGNED_EEW8_INDEX, EEW8_INDEX, EEW16_INDEX,  \
-  EEW32_INDEX, EEW64_INDEX, SHIFT, DOUBLE_TRUNC, QUAD_TRUNC, QUAD_EMUL,        \
-  QUAD_EMUL_SIGNED, QUAD_EMUL_UNSIGNED, QUAD_FIX, QUAD_FIX_SIGNED,             \
-  QUAD_FIX_UNSIGNED, OCT_TRUNC, DOUBLE_TRUNC_SCALAR, DOUBLE_TRUNC_SIGNED,      \
-  DOUBLE_TRUNC_UNSIGNED, DOUBLE_TRUNC_UNSIGNED_SCALAR,                         \
-  DOUBLE_TRUNC_BFLOAT_SCALAR, DOUBLE_TRUNC_BFLOAT, DOUBLE_TRUNC_FLOAT, FLOAT,  \
-  LMUL1, WLMUL1, QLMUL1, QLMUL1_SIGNED, QLMUL1_UNSIGNED, XFQF, EEW8_INTERPRET, \
-  EEW16_INTERPRET, EEW32_INTERPRET, EEW64_INTERPRET, BOOL1_INTERPRET,          \
-  BOOL2_INTERPRET, BOOL4_INTERPRET, BOOL8_INTERPRET, BOOL16_INTERPRET,         \
-  BOOL32_INTERPRET, BOOL64_INTERPRET, SIGNED_EEW8_LMUL1_INTERPRET,             \
-  SIGNED_EEW16_LMUL1_INTERPRET, SIGNED_EEW32_LMUL1_INTERPRET,                  \
-  SIGNED_EEW64_LMUL1_INTERPRET, UNSIGNED_EEW8_LMUL1_INTERPRET,                 \
-  UNSIGNED_EEW16_LMUL1_INTERPRET, UNSIGNED_EEW32_LMUL1_INTERPRET,              \
-  UNSIGNED_EEW64_LMUL1_INTERPRET, X2, X2_VLMUL_EXT, X4_VLMUL_EXT, X8_VLMUL_EXT,\
-  X16_VLMUL_EXT, X32_VLMUL_EXT, X64_VLMUL_EXT, TUPLE_SUBPART)                  \
+  EEW32_INDEX, EEW64_INDEX, SHIFT, DOUBLE_TRUNC, QUAD_TRUNC,                   \
+  QUAD_TRUNC_UNSIGNED, QUAD_EMUL, QUAD_EMUL_SIGNED, QUAD_EMUL_UNSIGNED,        \
+  QUAD_FIX, QUAD_FIX_SIGNED, QUAD_FIX_UNSIGNED, OCT_TRUNC,                     \
+  DOUBLE_TRUNC_SCALAR, DOUBLE_TRUNC_SIGNED, DOUBLE_TRUNC_UNSIGNED,             \
+  DOUBLE_TRUNC_UNSIGNED_SCALAR, DOUBLE_TRUNC_BFLOAT_SCALAR,                    \
+  DOUBLE_TRUNC_BFLOAT, DOUBLE_TRUNC_FLOAT, FLOAT, LMUL1, WLMUL1, QLMUL1,       \
+  QLMUL1_SIGNED, QLMUL1_UNSIGNED, XFQF, EEW8_INTERPRET, EEW16_INTERPRET,       \
+  EEW32_INTERPRET, EEW64_INTERPRET, BOOL1_INTERPRET, BOOL2_INTERPRET,          \
+  BOOL4_INTERPRET, BOOL8_INTERPRET, BOOL16_INTERPRET, BOOL32_INTERPRET,        \
+  BOOL64_INTERPRET, SIGNED_EEW8_LMUL1_INTERPRET, SIGNED_EEW16_LMUL1_INTERPRET, \
+  SIGNED_EEW32_LMUL1_INTERPRET, SIGNED_EEW64_LMUL1_INTERPRET,                  \
+  UNSIGNED_EEW8_LMUL1_INTERPRET, UNSIGNED_EEW16_LMUL1_INTERPRET,               \
+  UNSIGNED_EEW32_LMUL1_INTERPRET, UNSIGNED_EEW64_LMUL1_INTERPRET, X2,          \
+  X2_VLMUL_EXT, X4_VLMUL_EXT, X8_VLMUL_EXT, X16_VLMUL_EXT, X32_VLMUL_EXT,      \
+  X64_VLMUL_EXT, TUPLE_SUBPART)                                                \
   {                                                                            \
     VECTOR_TYPE_##VECTOR,                                                      \
     VECTOR_TYPE_INVALID,                                                       \
@@ -3506,6 +3515,7 @@ static CONSTEXPR const function_type_info function_types[] = {
     VECTOR_TYPE_##SHIFT,                                                       \
     VECTOR_TYPE_##DOUBLE_TRUNC,                                                \
     VECTOR_TYPE_##QUAD_TRUNC,                                                  \
+    VECTOR_TYPE_##QUAD_TRUNC_UNSIGNED,                                         \
     VECTOR_TYPE_##QUAD_EMUL,                                                   \
     VECTOR_TYPE_##QUAD_EMUL_SIGNED,                                            \
     VECTOR_TYPE_##QUAD_EMUL_UNSIGNED,                                          \

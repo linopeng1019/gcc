@@ -1620,6 +1620,20 @@ public:
 	    return e.use_exact_insn (code_for_pred_trunc (e.vector_mode ()));
 	  }
       }
+    if (e.op_info->op == OP_TYPE_f_q)
+      {
+	switch (get_altfmt (e))
+	  {
+	  case F8E4M3:
+	    return e.use_exact_insn (
+	      code_for_pred_quad_trunc_to (e.vector_mode (), UNSPEC_F8E4M3));
+	  case F8E5M2:
+	    return e.use_exact_insn (
+	      code_for_pred_quad_trunc_to (e.vector_mode (), UNSPEC_F8E5M2));
+	  default:
+	    gcc_unreachable ();
+	  }
+      }
     if (e.op_info->op == OP_TYPE_x_w)
       return e.use_exact_insn (code_for_pred_narrow (FLOAT, e.arg_mode (0)));
     if (e.op_info->op == OP_TYPE_xu_w)
@@ -1654,6 +1668,22 @@ public:
 	      code_for_pred_trunc_to (e.vector_mode (), UNSPEC_F8E5M2_SAT));
 	  default:
 	    break;
+	  }
+      }
+    if (e.op_info->op == OP_TYPE_f_q)
+      {
+	switch (get_altfmt (e))
+	  {
+	  case F8E4M3:
+	    return e.use_exact_insn (
+	      code_for_pred_quad_trunc_to (e.vector_mode (),
+					   UNSPEC_F8E4M3_SAT));
+	  case F8E5M2:
+	    return e.use_exact_insn (
+	      code_for_pred_quad_trunc_to (e.vector_mode (),
+					   UNSPEC_F8E5M2_SAT));
+	  default:
+	    gcc_unreachable ();
 	  }
       }
     gcc_unreachable ();

@@ -824,9 +824,12 @@ build_f8_narrow_name (function_builder &b, const function_instance &instance,
       vector_type_index vti
 	= instance.op_info->args[0].get_function_type_index (
 	  instance.type.index);
-      const char *src_scalar
-	= vti == VECTOR_TYPE_INVALID ? nullptr : type_suffixes[vti].scalar;
-      b.append_name (src_scalar ? src_scalar : "_bf16");
+      if (instance.op_info->op == OP_TYPE_f_w)
+	{
+	  const char *src_scalar
+	    = vti == VECTOR_TYPE_INVALID ? nullptr : type_suffixes[vti].scalar;
+	  b.append_name (src_scalar ? src_scalar : "_bf16");
+	}
       b.append_name ("_");
       b.append_name (altfmt);
     }
@@ -836,7 +839,8 @@ build_f8_narrow_name (function_builder &b, const function_instance &instance,
       vector_type_index vti
 	= instance.op_info->args[0].get_function_type_index (
 	  instance.type.index);
-      if (vti != VECTOR_TYPE_INVALID)
+      /* Additional type suffix before output type suffix.  */
+      if (vti != VECTOR_TYPE_INVALID && instance.op_info->op != OP_TYPE_f_q)
 	b.append_name (type_suffixes[vti].vector);
       append_f8_suffix (b,
 			instance.op_info->ret.get_function_type_index (
