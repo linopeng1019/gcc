@@ -27,6 +27,7 @@
 #include "tm_p.h"
 #include "memmodel.h"
 #include "insn-codes.h"
+#include "insn-attr.h"
 #include "optabs.h"
 #include "recog.h"
 #include "expr.h"
@@ -108,6 +109,9 @@ public:
 	  = get_vector_mode (QImode, GET_MODE_NUNITS (mode)).require ();
 	e.add_input_operand (Pmode, gen_int_mode (get_vlmul (e8_mode), Pmode));
       }
+
+    /* ALTFMT_NONE.  */
+    e.add_input_operand (Pmode, gen_int_mode (ALTFMT_NONE, Pmode));
 
     /* TAIL_ANY.  */
     e.add_input_operand (Pmode,

@@ -1288,15 +1288,17 @@ public:
       avl = GEN_INT (0);
     rtx sew = gen_int_mode (get_sew (), Pmode);
     rtx vlmul = gen_int_mode (get_vlmul (), Pmode);
+    rtx altfmt = const0_rtx;
     rtx ta = gen_int_mode (get_ta (), Pmode);
     rtx ma = gen_int_mode (get_ma (), Pmode);
 
     if (change_vtype_only_p ())
-      return gen_vsetvl_vtype_change_only (sew, vlmul, ta, ma);
+      return gen_vsetvl_vtype_change_only (sew, vlmul, altfmt, ta, ma);
     else if (has_vl () && !ignore_vl)
-      return gen_vsetvl (Pmode, get_vl (), avl, sew, vlmul, ta, ma);
+      return gen_vsetvl (Pmode, get_vl (), avl, sew, vlmul, altfmt, ta, ma);
     else
-      return gen_vsetvl_discard_result (Pmode, avl, sew, vlmul, ta, ma);
+      return gen_vsetvl_discard_result (Pmode, avl, sew, vlmul, altfmt, ta,
+					ma);
   }
 
   /* Return true that the non-AVL operands of THIS will be modified
