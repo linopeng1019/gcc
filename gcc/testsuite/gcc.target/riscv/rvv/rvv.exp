@@ -155,9 +155,18 @@ foreach op $AUTOVEC_TEST_OPTS {
 
 set POLICY [list {policy} {non-policy} ]
 set OVERLOAD [list {overloaded} {non-overloaded} ]
+
+# For Zvfofp8min feature tests
 foreach po $POLICY {
   foreach ov $OVERLOAD {
-    # For Andes Vector feature tests
+    dg-runtest [lsort [glob -nocomplain $srcdir/$subdir/zvfofp8min/$po/$ov/*.\[cS\]]] \
+      "" $CFLAGS
+  }
+}
+
+# For Andes Vector feature tests
+foreach po $POLICY {
+  foreach ov $OVERLOAD {
     dg-runtest [lsort [glob -nocomplain $srcdir/$subdir/xandesvector/$po/$ov/*.\[cS\]]] \
       "" $CFLAGS
   }
