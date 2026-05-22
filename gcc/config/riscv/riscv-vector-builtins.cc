@@ -3715,7 +3715,8 @@ riscv_pragma_intrinsic_flags_pollute (struct pragma_intrinsic_flags *flags)
 
   riscv_zvf_subext = riscv_zvf_subext
     | MASK_ZVFBFMIN
-    | MASK_ZVFHMIN;
+    | MASK_ZVFHMIN
+    | MASK_ZVFOFP8MIN;
 
   riscv_isa_flags = riscv_isa_flags
     | MASK_VECTOR;
@@ -3986,6 +3987,14 @@ register_builtin_types ()
   register_builtin_types_on_null ();
 }
 
+/* Return true if TYPE is an FP8 vector type.  */
+static bool
+float8_vector_type_p (vector_type_index type)
+{
+  return type >= VECTOR_TYPE_vfloat8e4m3mf8_t
+	 && type <= VECTOR_TYPE_vfloat8e5m2m8_t;
+}
+
 /* Similar as register_builtin_types but perform the registration if and
    only if the element of abi_vector_type is NULL_TREE.  */
 static void
@@ -4005,7 +4014,10 @@ register_builtin_types_on_null ()
 #define DEF_RVV_TYPE(NAME, NCHARS, ABI_NAME, SCALAR_TYPE, VECTOR_MODE,         \
 		     ARGS...)                                                  \
   mode = VECTOR_MODE##mode;                                                    \
-  if (abi_vector_types[VECTOR_TYPE_##NAME] == NULL_TREE)                       \
+  /* FP8 vector types use QI machine modes, so mode availability alone         \
+     does not imply TARGET_ZVFOFP8MIN.  */                                     \
+  if (abi_vector_types[VECTOR_TYPE_##NAME] == NULL_TREE                        \
+      && (!float8_vector_type_p (VECTOR_TYPE_##NAME) || TARGET_ZVFOFP8MIN))    \
     register_builtin_type (VECTOR_TYPE_##NAME, SCALAR_TYPE##_type_node, mode);
 
 #define DEF_RVV_TUPLE_TYPE(NAME, NCHARS, ABI_NAME, SUBPART_TYPE, SCALAR_TYPE,  \

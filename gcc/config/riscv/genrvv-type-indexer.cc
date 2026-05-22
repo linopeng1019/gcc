@@ -159,6 +159,18 @@ bfloat16_type (int lmul_log2, unsigned nf)
 }
 
 std::string
+float8_type (const char *fmt, int lmul_log2)
+{
+  /* FP8 vectors use QI machine modes, so use the integer validity check.  */
+  if (!valid_type (8, lmul_log2, /*float_t*/ false))
+    return "INVALID";
+
+  std::stringstream mode;
+  mode << "vfloat8" << fmt << to_lmul (lmul_log2) << "_t";
+  return mode.str ();
+}
+
+std::string
 floattype (unsigned sew, int lmul_log2)
 {
   if (!valid_type (sew, lmul_log2, /*float_t*/ true))
@@ -448,6 +460,72 @@ main (int argc, const char **argv)
 		     inttype (sew, lmul_log2, 1, unsigned_p).c_str ());
 	    fprintf (fp, ")\n");
 	  }
+
+  // Build for vfloat8.
+  for (const char *fmt : {"e4m3", "e5m2"})
+    for (int lmul_log2 : {-3, -2, -1, 0, 1, 2, 3})
+      {
+	fprintf (fp, "DEF_RVV_TYPE_INDEX (\n");
+	fprintf (fp, "  /*VECTOR*/ %s,\n",
+		 float8_type (fmt, lmul_log2).c_str ());
+	fprintf (fp, "  /*MASK*/ %s,\n", maskmode (8, lmul_log2).c_str ());
+	fprintf (fp, "  /*SIGNED*/ %s,\n",
+		 inttype (8, lmul_log2, /*unsigned_p*/ false).c_str ());
+	fprintf (fp, "  /*UNSIGNED*/ %s,\n",
+		 inttype (8, lmul_log2, /*unsigned_p*/ true).c_str ());
+	fprintf (fp, "  /*SIGNED_EEW8_INDEX*/ INVALID,\n");
+	for (unsigned eew : {8, 16, 32, 64})
+	  fprintf (fp, "  /*EEW%d_INDEX*/ %s,\n", eew,
+		   same_ratio_eew_type (8, lmul_log2, eew,
+					/*unsigned_p*/ true, false)
+		     .c_str ());
+	fprintf (fp, "  /*SHIFT*/ INVALID,\n");
+	fprintf (fp, "  /*DOUBLE_TRUNC*/ INVALID,\n");
+	fprintf (fp, "  /*QUAD_TRUNC*/ INVALID,\n");
+	fprintf (fp, "  /*QUAD_EMUL*/ INVALID,\n");
+	fprintf (fp, "  /*QUAD_EMUL_SIGNED*/ INVALID,\n");
+	fprintf (fp, "  /*QUAD_EMUL_UNSIGNED*/ INVALID,\n");
+	fprintf (fp, "  /*QUAD_FIX*/ INVALID,\n");
+	fprintf (fp, "  /*QUAD_FIX_SIGNED*/ INVALID,\n");
+	fprintf (fp, "  /*QUAD_FIX_UNSIGNED*/ INVALID,\n");
+	fprintf (fp, "  /*OCT_TRUNC*/ INVALID,\n");
+	fprintf (fp, "  /*DOUBLE_TRUNC_SCALAR*/ INVALID,\n");
+	fprintf (fp, "  /*DOUBLE_TRUNC_SIGNED*/ INVALID,\n");
+	fprintf (fp, "  /*DOUBLE_TRUNC_UNSIGNED*/ INVALID,\n");
+	fprintf (fp, "  /*DOUBLE_TRUNC_UNSIGNED_SCALAR*/ INVALID,\n");
+	fprintf (fp, "  /*DOUBLE_TRUNC_BFLOAT_SCALAR*/ INVALID,\n");
+	fprintf (fp, "  /*DOUBLE_TRUNC_BFLOAT*/ INVALID,\n");
+	fprintf (fp, "  /*DOUBLE_TRUNC_FLOAT*/ INVALID,\n");
+	fprintf (fp, "  /*FLOAT*/ INVALID,\n");
+	fprintf (fp, "  /*LMUL1*/ %s,\n", float8_type (fmt, 0).c_str ());
+	fprintf (fp, "  /*WLMUL1*/ INVALID,\n");
+	fprintf (fp, "  /*QLMUL1*/ INVALID,\n");
+	fprintf (fp, "  /*QLMUL1_SIGNED*/ INVALID,\n");
+	fprintf (fp, "  /*QLMUL1_UNSIGNED*/ INVALID,\n");
+	fprintf (fp, "  /*XFQF*/ INVALID,\n");
+	for (unsigned eew : {8, 16, 32, 64})
+	  fprintf (fp, "  /*EEW%d_INTERPRET*/ INVALID,\n", eew);
+
+	for (unsigned boolsize : BOOL_SIZE_LIST)
+	  fprintf (fp, "  /*BOOL%d_INTERPRET*/ INVALID,\n", boolsize);
+
+	for (unsigned eew : EEW_SIZE_LIST)
+	  fprintf (fp, "  /*SIGNED_EEW%d_LMUL1_INTERPRET*/ INVALID,\n", eew);
+
+	for (unsigned eew : EEW_SIZE_LIST)
+	  fprintf (fp, "  /*UNSIGNED_EEW%d_LMUL1_INTERPRET*/ INVALID,\n", eew);
+
+	fprintf (fp, "  /*X2*/ INVALID,\n");
+
+	for (unsigned lmul_log2_offset : {1, 2, 3, 4, 5, 6})
+	  {
+	    unsigned multiple_of_lmul = 1 << lmul_log2_offset;
+	    fprintf (fp, "  /*X%d_VLMUL_EXT*/ INVALID,\n", multiple_of_lmul);
+	  }
+	fprintf (fp, "  /*TUPLE_SUBPART*/ INVALID\n");
+	fprintf (fp, ")\n");
+      }
+
   // Build for vbfloat16
   for (int lmul_log2 : {-2, -1, 0, 1, 2, 3})
     for (unsigned nf : {1, 2, 3, 4, 5, 6, 7, 8})
