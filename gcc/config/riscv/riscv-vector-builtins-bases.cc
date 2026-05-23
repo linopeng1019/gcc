@@ -1605,12 +1605,43 @@ public:
   rtx expand (function_expander &e) const override
   {
     if (e.op_info->op == OP_TYPE_f_w)
-      return e.use_exact_insn (code_for_pred_trunc (e.vector_mode ()));
+      {
+	uint8_t fp8_altfmt
+	  = fp8_base_type_altfmt (e.op_info->ret.base_type);
+	if (fp8_altfmt != INVALID_ATTRIBUTE)
+	  return e.use_exact_insn_with_altfmt (code_for_pred_trunc_to_float8 (
+						 e.vector_mode ()),
+					       fp8_altfmt);
+	return e.use_exact_insn (code_for_pred_trunc (e.vector_mode ()));
+      }
     if (e.op_info->op == OP_TYPE_x_w)
       return e.use_exact_insn (code_for_pred_narrow (FLOAT, e.arg_mode (0)));
     if (e.op_info->op == OP_TYPE_xu_w)
       return e.use_exact_insn (
 	code_for_pred_narrow (UNSIGNED_FLOAT, e.arg_mode (0)));
+    gcc_unreachable ();
+  }
+};
+
+/* Implements vfncvt.sat.f (saturating narrowing to FP8).  */
+template <enum frm_op_type FRM_OP = NO_FRM>
+class vfncvt_sat_f : public function_base
+{
+public:
+  bool has_rounding_mode_operand_p () const override
+  {
+    return FRM_OP == HAS_FRM;
+  }
+
+  bool may_require_frm_p () const override { return true; }
+
+  rtx expand (function_expander &e) const override
+  {
+    uint8_t fp8_altfmt = fp8_base_type_altfmt (e.op_info->ret.base_type);
+    if (e.op_info->op == OP_TYPE_f_w && fp8_altfmt != INVALID_ATTRIBUTE)
+      return e.use_exact_insn_with_altfmt (code_for_pred_trunc_to_float8_sat (
+					     e.vector_mode ()),
+					   fp8_altfmt);
     gcc_unreachable ();
   }
 };
@@ -2689,6 +2720,8 @@ static constexpr const vfncvt_rtz_x<FIX> vfncvt_rtz_x_obj;
 static constexpr const vfncvt_rtz_x<UNSIGNED_FIX> vfncvt_rtz_xu_obj;
 static constexpr const vfncvt_f<NO_FRM> vfncvt_f_obj;
 static constexpr const vfncvt_f<HAS_FRM> vfncvt_f_frm_obj;
+static constexpr const vfncvt_sat_f<NO_FRM> vfncvt_sat_f_obj;
+static constexpr const vfncvt_sat_f<HAS_FRM> vfncvt_sat_f_frm_obj;
 static constexpr const vfncvt_rod_f vfncvt_rod_f_obj;
 static constexpr const reducop<UNSPEC_REDUC_SUM> vredsum_obj;
 static constexpr const reducop<UNSPEC_REDUC_MAXU> vredmaxu_obj;
@@ -3019,6 +3052,8 @@ BASE (vfncvt_rtz_x)
 BASE (vfncvt_rtz_xu)
 BASE (vfncvt_f)
 BASE (vfncvt_f_frm)
+BASE (vfncvt_sat_f)
+BASE (vfncvt_sat_f_frm)
 BASE (vfncvt_rod_f)
 BASE (vredsum)
 BASE (vredmaxu)

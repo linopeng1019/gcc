@@ -2108,6 +2108,24 @@ static constexpr const rvv_op_info f8e5m2_to_bf16_f_v_ops
      rvv_arg_type_info (RVV_BASE_vector), /* Return type.  */
      f8e5m2_w_v_args /* Args.  */};
 
+/* A static operand information for double_trunc_float8e4m3_vector
+   func (vector_type) function registration.  */
+static constexpr const rvv_op_info bf16_to_f8e4m3_f_w_ops
+  = {fp8_bf16_ops,			      /* Types.  */
+     OP_TYPE_f_w,			      /* Suffix.  */
+     rvv_arg_type_info (RVV_BASE_double_trunc_float8e4m3_vector),
+					      /* Return type.  */
+     v_args /* Args.  */};
+
+/* A static operand information for double_trunc_float8e5m2_vector
+   func (vector_type) function registration.  */
+static constexpr const rvv_op_info bf16_to_f8e5m2_f_w_ops
+  = {fp8_bf16_ops,			      /* Types.  */
+     OP_TYPE_f_w,			      /* Suffix.  */
+     rvv_arg_type_info (RVV_BASE_double_trunc_float8e5m2_vector),
+					      /* Return type.  */
+     v_args /* Args.  */};
+
 /* A static operand information for vector_type func (vector_type, double demote
  * type, double demote type) function registration. */
 static constexpr const rvv_op_info f32_wwvv_ops

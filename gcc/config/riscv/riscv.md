@@ -103,6 +103,7 @@
 
   ;; Zvfofp8min
   UNSPEC_F8
+  UNSPEC_F8_SAT
 ])
 
 (define_c_enum "unspecv" [

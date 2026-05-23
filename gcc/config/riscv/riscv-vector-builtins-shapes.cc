@@ -99,7 +99,9 @@ supports_vectype_p (const function_group_info &group, unsigned int vec_type_idx)
       || *group.shape == shapes::seg_loadstore
       || *group.shape == shapes::seg_indexed_loadstore
       || *group.shape == shapes::seg_fault_load
-      || *group.shape == shapes::alu_f8_to_bf16)
+      || *group.shape == shapes::alu_f8_to_bf16
+      || *group.shape == shapes::narrow_alu_to_f8
+      || *group.shape == shapes::narrow_alu_to_f8_frm)
     return true;
   return false;
 }
@@ -757,6 +759,84 @@ struct narrow_alu_def : public build_base
 	   rounding mode in the future.  */
       }
     return true;
+  }
+};
+
+/* Append the FP8 result format suffix ("_f8e4m3" or "_f8e5m2")
+   implied by an FP8 base type.  */
+static void
+append_fp8_suffix (function_builder &b, enum rvv_base_type bt)
+{
+  switch (bt)
+    {
+    case RVV_BASE_double_trunc_float8e4m3_vector:
+      b.append_name ("_f8e4m3");
+      break;
+    case RVV_BASE_double_trunc_float8e5m2_vector:
+      b.append_name ("_f8e5m2");
+      break;
+    default:
+      gcc_unreachable ();
+    }
+}
+
+/* Build names for narrowing conversions to FP8.  The overloaded API keeps an
+   FP8 result format suffix.  The non-overloaded API includes the FP8 result
+   type and includes a source type only when the operand suffix does not imply
+   it.  */
+struct narrow_alu_to_f8_def : public narrow_alu_def
+{
+  char *get_name (function_builder &b, const function_instance &instance,
+		  bool overloaded_p) const override
+  {
+    b.append_base_name (instance.base_name);
+
+    if (overloaded_p)
+      append_fp8_suffix (b, instance.op_info->ret.base_type);
+    else
+      {
+	b.append_name (operand_suffixes[instance.op_info->op]);
+	b.append_name (type_suffixes[instance.type.index].vector);
+	vector_type_index ret_type_idx
+	  = instance.op_info->ret.get_function_type_index (instance.type.index);
+	b.append_name (type_suffixes[ret_type_idx].vector);
+      }
+
+    if (overloaded_p && instance.pred == PRED_TYPE_m)
+      return b.finish_name ();
+    b.append_name (predication_suffixes[instance.pred]);
+    return b.finish_name ();
+  }
+};
+
+/* Like narrow_alu_to_f8_def but for the rounding-mode (_frm) variant.
+   The non-overloaded API additionally appends "_rm".  */
+struct narrow_alu_to_f8_frm_def : public build_frm_base
+{
+  char *get_name (function_builder &b, const function_instance &instance,
+		  bool overloaded_p) const override
+  {
+    char base_name[BASE_NAME_MAX_LEN] = {};
+    normalize_base_name (base_name, instance.base_name, sizeof (base_name));
+
+    b.append_base_name (base_name);
+
+    if (overloaded_p)
+      append_fp8_suffix (b, instance.op_info->ret.base_type);
+    else
+      {
+	b.append_name (operand_suffixes[instance.op_info->op]);
+	b.append_name (type_suffixes[instance.type.index].vector);
+	vector_type_index ret_type_idx
+	  = instance.op_info->ret.get_function_type_index (instance.type.index);
+	b.append_name (type_suffixes[ret_type_idx].vector);
+	b.append_name ("_rm");
+      }
+
+    if (overloaded_p && instance.pred == PRED_TYPE_m)
+      return b.finish_name ();
+    b.append_name (predication_suffixes[instance.pred]);
+    return b.finish_name ();
   }
 };
 
@@ -1435,6 +1515,8 @@ SHAPE(th_loadstore_width, th_loadstore_width)
 SHAPE(th_indexed_loadstore_width, th_indexed_loadstore_width)
 SHAPE(alu, alu)
 SHAPE(alu_f8_to_bf16, alu_f8_to_bf16)
+SHAPE(narrow_alu_to_f8, narrow_alu_to_f8)
+SHAPE(narrow_alu_to_f8_frm, narrow_alu_to_f8_frm)
 SHAPE(alu_frm, alu_frm)
 SHAPE(widen_alu, widen_alu)
 SHAPE(widen_alu_frm, widen_alu_frm)
