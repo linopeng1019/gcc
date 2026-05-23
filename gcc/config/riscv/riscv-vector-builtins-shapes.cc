@@ -770,9 +770,11 @@ append_fp8_suffix (function_builder &b, enum rvv_base_type bt)
   switch (bt)
     {
     case RVV_BASE_double_trunc_float8e4m3_vector:
+    case RVV_BASE_quad_trunc_float8e4m3_vector:
       b.append_name ("_f8e4m3");
       break;
     case RVV_BASE_double_trunc_float8e5m2_vector:
+    case RVV_BASE_quad_trunc_float8e5m2_vector:
       b.append_name ("_f8e5m2");
       break;
     default:
@@ -796,7 +798,8 @@ struct narrow_alu_to_f8_def : public narrow_alu_def
     else
       {
 	b.append_name (operand_suffixes[instance.op_info->op]);
-	b.append_name (type_suffixes[instance.type.index].vector);
+	if (instance.op_info->op != OP_TYPE_f_q)
+	  b.append_name (type_suffixes[instance.type.index].vector);
 	vector_type_index ret_type_idx
 	  = instance.op_info->ret.get_function_type_index (instance.type.index);
 	b.append_name (type_suffixes[ret_type_idx].vector);
@@ -826,7 +829,8 @@ struct narrow_alu_to_f8_frm_def : public build_frm_base
     else
       {
 	b.append_name (operand_suffixes[instance.op_info->op]);
-	b.append_name (type_suffixes[instance.type.index].vector);
+	if (instance.op_info->op != OP_TYPE_f_q)
+	  b.append_name (type_suffixes[instance.type.index].vector);
 	vector_type_index ret_type_idx
 	  = instance.op_info->ret.get_function_type_index (instance.type.index);
 	b.append_name (type_suffixes[ret_type_idx].vector);

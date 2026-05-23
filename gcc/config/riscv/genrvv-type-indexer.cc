@@ -301,6 +301,8 @@ main (int argc, const char **argv)
       fprintf (fp, "  /*DOUBLE_TRUNC_FLOAT*/ INVALID,\n");
       fprintf (fp, "  /*DOUBLE_TRUNC_FLOAT8E4M3*/ INVALID,\n");
       fprintf (fp, "  /*DOUBLE_TRUNC_FLOAT8E5M2*/ INVALID,\n");
+      fprintf (fp, "  /*QUAD_TRUNC_FLOAT8E4M3*/ INVALID,\n");
+      fprintf (fp, "  /*QUAD_TRUNC_FLOAT8E5M2*/ INVALID,\n");
       fprintf (fp, "  /*FLOAT8E4M3*/ INVALID,\n");
       fprintf (fp, "  /*FLOAT8E5M2*/ INVALID,\n");
       fprintf (fp, "  /*FLOAT*/ INVALID,\n");
@@ -410,6 +412,8 @@ main (int argc, const char **argv)
 		       .c_str ());
 	    fprintf (fp, "  /*DOUBLE_TRUNC_FLOAT8E4M3*/ INVALID,\n");
 	    fprintf (fp, "  /*DOUBLE_TRUNC_FLOAT8E5M2*/ INVALID,\n");
+	    fprintf (fp, "  /*QUAD_TRUNC_FLOAT8E4M3*/ INVALID,\n");
+	    fprintf (fp, "  /*QUAD_TRUNC_FLOAT8E5M2*/ INVALID,\n");
 	    fprintf (fp, "  /*FLOAT8E4M3*/ %s,\n",
 		     sew == 8 && nf == 1
 		       ? float8_type ("e4m3", lmul_log2).c_str ()
@@ -512,6 +516,8 @@ main (int argc, const char **argv)
 	fprintf (fp, "  /*DOUBLE_TRUNC_FLOAT*/ INVALID,\n");
 	fprintf (fp, "  /*DOUBLE_TRUNC_FLOAT8E4M3*/ INVALID,\n");
 	fprintf (fp, "  /*DOUBLE_TRUNC_FLOAT8E5M2*/ INVALID,\n");
+	fprintf (fp, "  /*QUAD_TRUNC_FLOAT8E4M3*/ INVALID,\n");
+	fprintf (fp, "  /*QUAD_TRUNC_FLOAT8E5M2*/ INVALID,\n");
 	fprintf (fp, "  /*FLOAT8E4M3*/ INVALID,\n");
 	fprintf (fp, "  /*FLOAT8E5M2*/ INVALID,\n");
 	fprintf (fp, "  /*FLOAT*/ INVALID,\n");
@@ -592,6 +598,8 @@ main (int argc, const char **argv)
 	fprintf (fp, "  /*DOUBLE_TRUNC_FLOAT8E5M2*/ %s,\n",
 		 nf == 1 ? float8_type ("e5m2", lmul_log2 - 1).c_str ()
 			 : "INVALID");
+	fprintf (fp, "  /*QUAD_TRUNC_FLOAT8E4M3*/ INVALID,\n");
+	fprintf (fp, "  /*QUAD_TRUNC_FLOAT8E5M2*/ INVALID,\n");
 	fprintf (fp, "  /*FLOAT8E4M3*/ INVALID,\n");
 	fprintf (fp, "  /*FLOAT8E5M2*/ INVALID,\n");
 	fprintf (fp, "  /*FLOAT*/ INVALID,\n");
@@ -684,6 +692,14 @@ main (int argc, const char **argv)
 		     .c_str ());
 	  fprintf (fp, "  /*DOUBLE_TRUNC_FLOAT8E4M3*/ INVALID,\n");
 	  fprintf (fp, "  /*DOUBLE_TRUNC_FLOAT8E5M2*/ INVALID,\n");
+	  fprintf (fp, "  /*QUAD_TRUNC_FLOAT8E4M3*/ %s,\n",
+		   sew == 32 && nf == 1
+		     ? float8_type ("e4m3", lmul_log2 - 2).c_str ()
+		     : "INVALID");
+	  fprintf (fp, "  /*QUAD_TRUNC_FLOAT8E5M2*/ %s,\n",
+		   sew == 32 && nf == 1
+		     ? float8_type ("e5m2", lmul_log2 - 2).c_str ()
+		     : "INVALID");
 	  fprintf (fp, "  /*FLOAT8E4M3*/ INVALID,\n");
 	  fprintf (fp, "  /*FLOAT8E5M2*/ INVALID,\n");
 	  fprintf (fp, "  /*FLOAT*/ INVALID,\n");

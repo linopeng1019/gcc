@@ -785,18 +785,34 @@ DEF_RVV_FUNCTION (vfncvt_f, narrow_alu_to_f8, full_preds,
 		  bf16_to_f8e4m3_f_w_ops)
 DEF_RVV_FUNCTION (vfncvt_f, narrow_alu_to_f8, full_preds,
 		  bf16_to_f8e5m2_f_w_ops)
+DEF_RVV_FUNCTION (vfncvt_f, narrow_alu_to_f8, full_preds,
+		  f32_to_f8e4m3_f_q_ops)
+DEF_RVV_FUNCTION (vfncvt_f, narrow_alu_to_f8, full_preds,
+		  f32_to_f8e5m2_f_q_ops)
 DEF_RVV_FUNCTION (vfncvt_sat_f, narrow_alu_to_f8, full_preds,
 		  bf16_to_f8e4m3_f_w_ops)
 DEF_RVV_FUNCTION (vfncvt_sat_f, narrow_alu_to_f8, full_preds,
 		  bf16_to_f8e5m2_f_w_ops)
+DEF_RVV_FUNCTION (vfncvt_sat_f, narrow_alu_to_f8, full_preds,
+		  f32_to_f8e4m3_f_q_ops)
+DEF_RVV_FUNCTION (vfncvt_sat_f, narrow_alu_to_f8, full_preds,
+		  f32_to_f8e5m2_f_q_ops)
 DEF_RVV_FUNCTION (vfncvt_f_frm, narrow_alu_to_f8_frm, full_preds,
 		  bf16_to_f8e4m3_f_w_ops)
 DEF_RVV_FUNCTION (vfncvt_f_frm, narrow_alu_to_f8_frm, full_preds,
 		  bf16_to_f8e5m2_f_w_ops)
+DEF_RVV_FUNCTION (vfncvt_f_frm, narrow_alu_to_f8_frm, full_preds,
+		  f32_to_f8e4m3_f_q_ops)
+DEF_RVV_FUNCTION (vfncvt_f_frm, narrow_alu_to_f8_frm, full_preds,
+		  f32_to_f8e5m2_f_q_ops)
 DEF_RVV_FUNCTION (vfncvt_sat_f_frm, narrow_alu_to_f8_frm, full_preds,
 		  bf16_to_f8e4m3_f_w_ops)
 DEF_RVV_FUNCTION (vfncvt_sat_f_frm, narrow_alu_to_f8_frm, full_preds,
 		  bf16_to_f8e5m2_f_w_ops)
+DEF_RVV_FUNCTION (vfncvt_sat_f_frm, narrow_alu_to_f8_frm, full_preds,
+		  f32_to_f8e4m3_f_q_ops)
+DEF_RVV_FUNCTION (vfncvt_sat_f_frm, narrow_alu_to_f8_frm, full_preds,
+		  f32_to_f8e5m2_f_q_ops)
 DEF_RVV_FUNCTION (vreinterpret, misc, none_preds, f8e4m3_v_u_ops)
 DEF_RVV_FUNCTION (vreinterpret, misc, none_preds, u_v_f8e4m3_ops)
 DEF_RVV_FUNCTION (vreinterpret, misc, none_preds, f8e5m2_v_u_ops)

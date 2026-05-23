@@ -67,8 +67,10 @@ fp8_base_type_altfmt (enum rvv_base_type bt)
   switch (bt)
     {
     case RVV_BASE_double_trunc_float8e4m3_vector:
+    case RVV_BASE_quad_trunc_float8e4m3_vector:
       return ALTFMT_NONE;
     case RVV_BASE_double_trunc_float8e5m2_vector:
+    case RVV_BASE_quad_trunc_float8e5m2_vector:
       return ALTFMT_ALT;
     default:
       return INVALID_ATTRIBUTE;
@@ -1614,6 +1616,14 @@ public:
 					       fp8_altfmt);
 	return e.use_exact_insn (code_for_pred_trunc (e.vector_mode ()));
       }
+    if (e.op_info->op == OP_TYPE_f_q)
+      {
+	uint8_t fp8_altfmt
+	  = fp8_base_type_altfmt (e.op_info->ret.base_type);
+	if (fp8_altfmt != INVALID_ATTRIBUTE)
+	  return e.use_exact_insn_with_altfmt (
+	    code_for_pred_quad_trunc_to_float8 (e.vector_mode ()), fp8_altfmt);
+      }
     if (e.op_info->op == OP_TYPE_x_w)
       return e.use_exact_insn (code_for_pred_narrow (FLOAT, e.arg_mode (0)));
     if (e.op_info->op == OP_TYPE_xu_w)
@@ -1638,6 +1648,9 @@ public:
   rtx expand (function_expander &e) const override
   {
     uint8_t fp8_altfmt = fp8_base_type_altfmt (e.op_info->ret.base_type);
+    if (e.op_info->op == OP_TYPE_f_q && fp8_altfmt != INVALID_ATTRIBUTE)
+      return e.use_exact_insn_with_altfmt (
+	code_for_pred_quad_trunc_to_float8_sat (e.vector_mode ()), fp8_altfmt);
     if (e.op_info->op == OP_TYPE_f_w && fp8_altfmt != INVALID_ATTRIBUTE)
       return e.use_exact_insn_with_altfmt (code_for_pred_trunc_to_float8_sat (
 					     e.vector_mode ()),
