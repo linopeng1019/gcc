@@ -781,6 +781,14 @@ static constexpr const rvv_arg_type_info v_args[]
   = {rvv_arg_type_info (RVV_BASE_vector), rvv_arg_type_info_end};
 
 /* A list of args for vector_type func (vector_type) function.  */
+static constexpr const rvv_arg_type_info f8e4m3_v_args[]
+  = {rvv_arg_type_info (RVV_BASE_float8e4m3_vector), rvv_arg_type_info_end};
+
+/* A list of args for vector_type func (vector_type) function.  */
+static constexpr const rvv_arg_type_info f8e5m2_v_args[]
+  = {rvv_arg_type_info (RVV_BASE_float8e5m2_vector), rvv_arg_type_info_end};
+
+/* A list of args for vector_type func (vector_type) function.  */
 static constexpr const rvv_arg_type_info v_x2_trunc_args[]
   = {rvv_arg_type_info (RVV_BASE_vlmul_ext_x2), rvv_arg_type_info_end};
 
@@ -2388,6 +2396,38 @@ static constexpr const rvv_op_info u_v_f_ops
      rvv_arg_type_info (RVV_BASE_vector), /* Return type */
      xu_v_args /* Args */};
 
+/* A static operand information for vector_type func (vector_type)
+ * function registration. */
+static constexpr const rvv_op_info f8e4m3_v_u_ops
+  = {u_ops,					   /* Types */
+     OP_TYPE_v,					   /* Suffix */
+     rvv_arg_type_info (RVV_BASE_unsigned_vector), /* Return type */
+     f8e4m3_v_args /* Args */};
+
+/* A static operand information for vector_type func (vector_type)
+ * function registration. */
+static constexpr const rvv_op_info u_v_f8e4m3_ops
+  = {u_ops,					     /* Types */
+     OP_TYPE_v,					     /* Suffix */
+     rvv_arg_type_info (RVV_BASE_float8e4m3_vector), /* Return type */
+     v_args /* Args */};
+
+/* A static operand information for vector_type func (vector_type)
+ * function registration. */
+static constexpr const rvv_op_info f8e5m2_v_u_ops
+  = {u_ops,					   /* Types */
+     OP_TYPE_v,					   /* Suffix */
+     rvv_arg_type_info (RVV_BASE_unsigned_vector), /* Return type */
+     f8e5m2_v_args /* Args */};
+
+/* A static operand information for vector_type func (vector_type)
+ * function registration. */
+static constexpr const rvv_op_info u_v_f8e5m2_ops
+  = {u_ops,					     /* Types */
+     OP_TYPE_v,					     /* Suffix */
+     rvv_arg_type_info (RVV_BASE_float8e5m2_vector), /* Return type */
+     v_args /* Args */};
+
 /* A static operand information for vector_type func (scalar_type)
  * function registration. */
 static constexpr const rvv_op_info iu_x_ops
@@ -3449,16 +3489,17 @@ static constexpr const function_type_info function_types[] = {
   QUAD_EMUL_SIGNED, QUAD_EMUL_UNSIGNED, QUAD_FIX, QUAD_FIX_SIGNED,             \
   QUAD_FIX_UNSIGNED, OCT_TRUNC, DOUBLE_TRUNC_SCALAR, DOUBLE_TRUNC_SIGNED,      \
   DOUBLE_TRUNC_UNSIGNED, DOUBLE_TRUNC_UNSIGNED_SCALAR,                         \
-  DOUBLE_TRUNC_BFLOAT_SCALAR, DOUBLE_TRUNC_BFLOAT, DOUBLE_TRUNC_FLOAT, FLOAT,  \
-  LMUL1, WLMUL1, QLMUL1, QLMUL1_SIGNED, QLMUL1_UNSIGNED, XFQF, EEW8_INTERPRET, \
-  EEW16_INTERPRET, EEW32_INTERPRET, EEW64_INTERPRET, BOOL1_INTERPRET,          \
-  BOOL2_INTERPRET, BOOL4_INTERPRET, BOOL8_INTERPRET, BOOL16_INTERPRET,         \
-  BOOL32_INTERPRET, BOOL64_INTERPRET, SIGNED_EEW8_LMUL1_INTERPRET,             \
-  SIGNED_EEW16_LMUL1_INTERPRET, SIGNED_EEW32_LMUL1_INTERPRET,                  \
-  SIGNED_EEW64_LMUL1_INTERPRET, UNSIGNED_EEW8_LMUL1_INTERPRET,                 \
-  UNSIGNED_EEW16_LMUL1_INTERPRET, UNSIGNED_EEW32_LMUL1_INTERPRET,              \
-  UNSIGNED_EEW64_LMUL1_INTERPRET, X2, X2_VLMUL_EXT, X4_VLMUL_EXT, X8_VLMUL_EXT,\
-  X16_VLMUL_EXT, X32_VLMUL_EXT, X64_VLMUL_EXT, TUPLE_SUBPART)                  \
+  DOUBLE_TRUNC_BFLOAT_SCALAR, DOUBLE_TRUNC_BFLOAT, DOUBLE_TRUNC_FLOAT,         \
+  FLOAT8E4M3, FLOAT8E5M2, FLOAT, LMUL1, WLMUL1, QLMUL1, QLMUL1_SIGNED,         \
+  QLMUL1_UNSIGNED, XFQF, EEW8_INTERPRET, EEW16_INTERPRET, EEW32_INTERPRET,     \
+  EEW64_INTERPRET, BOOL1_INTERPRET, BOOL2_INTERPRET, BOOL4_INTERPRET,          \
+  BOOL8_INTERPRET, BOOL16_INTERPRET, BOOL32_INTERPRET, BOOL64_INTERPRET,       \
+  SIGNED_EEW8_LMUL1_INTERPRET, SIGNED_EEW16_LMUL1_INTERPRET,                   \
+  SIGNED_EEW32_LMUL1_INTERPRET, SIGNED_EEW64_LMUL1_INTERPRET,                  \
+  UNSIGNED_EEW8_LMUL1_INTERPRET, UNSIGNED_EEW16_LMUL1_INTERPRET,               \
+  UNSIGNED_EEW32_LMUL1_INTERPRET, UNSIGNED_EEW64_LMUL1_INTERPRET, X2,          \
+  X2_VLMUL_EXT, X4_VLMUL_EXT, X8_VLMUL_EXT, X16_VLMUL_EXT, X32_VLMUL_EXT,      \
+  X64_VLMUL_EXT, TUPLE_SUBPART)                                                \
   {                                                                            \
     VECTOR_TYPE_##VECTOR,                                                      \
     VECTOR_TYPE_INVALID,                                                       \
@@ -3497,6 +3538,8 @@ static constexpr const function_type_info function_types[] = {
     VECTOR_TYPE_##DOUBLE_TRUNC_BFLOAT_SCALAR,                                  \
     VECTOR_TYPE_##DOUBLE_TRUNC_BFLOAT,                                         \
     VECTOR_TYPE_##DOUBLE_TRUNC_FLOAT,                                          \
+    VECTOR_TYPE_##FLOAT8E4M3,                                                  \
+    VECTOR_TYPE_##FLOAT8E5M2,                                                  \
     VECTOR_TYPE_##FLOAT,                                                       \
     VECTOR_TYPE_##LMUL1,                                                       \
     VECTOR_TYPE_##WLMUL1,                                                      \
@@ -4072,6 +4115,8 @@ required_extensions_p (enum rvv_base_type type)
       case RVV_BASE_eew64_index:
       case RVV_BASE_float_vector:
       case RVV_BASE_double_trunc_float_vector:
+      case RVV_BASE_float8e4m3_vector:
+      case RVV_BASE_float8e5m2_vector:
       case RVV_BASE_double_trunc_vector:
       case RVV_BASE_widen_lmul1_vector:
       case RVV_BASE_eew8_interpret:
