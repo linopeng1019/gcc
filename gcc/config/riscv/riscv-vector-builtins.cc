@@ -5360,7 +5360,6 @@ registered_function::overloaded_hash () const
 {
   inchash::hash h;
   tree type;
-  unsigned int unsigned_p, mode_p;
   h.add (overload_name, strlen (overload_name));
   for (unsigned int i = 0; i < argument_types.length (); i++)
     {
@@ -5371,14 +5370,17 @@ registered_function::overloaded_hash () const
       if (TREE_CODE_CLASS (TREE_CODE (type)) != tcc_type)
 	continue;
 
-      unsigned_p = POINTER_TYPE_P (type) ? TYPE_UNSIGNED (TREE_TYPE (type))
-					 : TYPE_UNSIGNED (type);
-      mode_p = POINTER_TYPE_P (type) ? TYPE_MODE (TREE_TYPE (type))
-				     : TYPE_MODE (type);
-      if (POINTER_TYPE_P (type) || lookup_vector_type_attribute (type))
+      /* Hash by RVV ABI mangled name so RVV types that share a machine
+	 mode but differ in identity hash apart.  */
+      if (const char *mangled_name = mangle_builtin_type (type))
 	{
-	  h.add_int (unsigned_p);
-	  h.add_int (mode_p);
+	  h.add_int (POINTER_TYPE_P (type));
+	  h.add (mangled_name, strlen (mangled_name));
+	}
+      else if (POINTER_TYPE_P (type))
+	{
+	  h.add_int (TYPE_UNSIGNED (TREE_TYPE (type)));
+	  h.add_int (TYPE_MODE (TREE_TYPE (type)));
 	}
       else if (instance.base->may_require_vxrm_p ()
 	       || instance.base->may_require_frm_p ())
