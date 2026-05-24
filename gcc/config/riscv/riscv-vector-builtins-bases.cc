@@ -59,6 +59,22 @@ enum lst_type
   LST_INDEXED,
 };
 
+/* Return ALTFMT_NONE / ALTFMT_ALT for an FP8 vector base type, or
+   INVALID_ATTRIBUTE if BT is not an FP8 base type.  */
+static uint8_t
+fp8_base_type_altfmt (enum rvv_base_type bt)
+{
+  switch (bt)
+    {
+    case RVV_BASE_double_trunc_float8e4m3_vector:
+      return ALTFMT_NONE;
+    case RVV_BASE_double_trunc_float8e5m2_vector:
+      return ALTFMT_ALT;
+    default:
+      return INVALID_ATTRIBUTE;
+    }
+}
+
 /* Implements vsetvl<mode> && vsetvlmax<mode>.  */
 template<bool VLMAX_P>
 class vsetvl : public function_base
@@ -1527,7 +1543,15 @@ public:
   rtx expand (function_expander &e) const override
   {
     if (e.op_info->op == OP_TYPE_f_v)
-      return e.use_exact_insn (code_for_pred_extend (e.vector_mode ()));
+      {
+	uint8_t fp8_altfmt
+	  = fp8_base_type_altfmt (e.op_info->args[0].base_type);
+	if (fp8_altfmt != INVALID_ATTRIBUTE)
+	  return e.use_exact_insn_with_altfmt (code_for_pred_extend_float8_to (
+						 e.vector_mode ()),
+					       fp8_altfmt);
+	return e.use_exact_insn (code_for_pred_extend (e.vector_mode ()));
+      }
     if (e.op_info->op == OP_TYPE_x_v)
       return e.use_exact_insn (code_for_pred_widen (FLOAT, e.vector_mode ()));
     if (e.op_info->op == OP_TYPE_xu_v)

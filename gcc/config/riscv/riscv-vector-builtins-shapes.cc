@@ -86,7 +86,8 @@ supports_vectype_p (const function_group_info &group, unsigned int vec_type_idx)
   int index = group.ops_infos.types[vec_type_idx].index;
   if (index < VECTOR_TYPE_vbfloat16mf4_t || index > VECTOR_TYPE_vbfloat16m8_t)
     return true;
-  /* Only judge for bf16 vector type  */
+  /* For bf16 vector types, only the shapes listed below opt in;
+     other types are unconditionally supported (handled above).  */
   if (*group.shape == shapes::loadstore
       || *group.shape == shapes::indexed_loadstore
       || *group.shape == shapes::vundefined
@@ -97,7 +98,8 @@ supports_vectype_p (const function_group_info &group, unsigned int vec_type_idx)
       || *group.shape == shapes::fault_load
       || *group.shape == shapes::seg_loadstore
       || *group.shape == shapes::seg_indexed_loadstore
-      || *group.shape == shapes::seg_fault_load)
+      || *group.shape == shapes::seg_fault_load
+      || *group.shape == shapes::alu_f8_to_bf16)
     return true;
   return false;
 }
@@ -421,6 +423,38 @@ struct alu_def : public build_base
 	   rounding mode in the future.  */
       }
     return true;
+  }
+};
+
+/* Build names for FP8-to-BF16 conversions.  The overloaded API keeps a "_bf16"
+   result suffix, while the non-overloaded API includes both the source FP8 type
+   and the BF16 result type.  */
+struct alu_f8_to_bf16_def : public alu_def
+{
+  char *get_name (function_builder &b, const function_instance &instance,
+		  bool overloaded_p) const override
+  {
+    if (overloaded_p && !instance.base->can_be_overloaded_p (instance.pred))
+      return nullptr;
+
+    b.append_base_name (instance.base_name);
+
+    if (overloaded_p)
+      b.append_name ("_bf16");
+    else
+      {
+	b.append_name (operand_suffixes[instance.op_info->op]);
+	vector_type_index arg_type_idx
+	  = instance.op_info->args[0].get_function_type_index (
+	    instance.type.index);
+	b.append_name (type_suffixes[arg_type_idx].vector);
+	b.append_name (type_suffixes[instance.type.index].vector);
+      }
+
+    if (overloaded_p && instance.pred == PRED_TYPE_m)
+      return b.finish_name ();
+    b.append_name (predication_suffixes[instance.pred]);
+    return b.finish_name ();
   }
 };
 
@@ -1400,6 +1434,7 @@ SHAPE(indexed_loadstore, indexed_loadstore)
 SHAPE(th_loadstore_width, th_loadstore_width)
 SHAPE(th_indexed_loadstore_width, th_indexed_loadstore_width)
 SHAPE(alu, alu)
+SHAPE(alu_f8_to_bf16, alu_f8_to_bf16)
 SHAPE(alu_frm, alu_frm)
 SHAPE(widen_alu, widen_alu)
 SHAPE(widen_alu_frm, widen_alu_frm)

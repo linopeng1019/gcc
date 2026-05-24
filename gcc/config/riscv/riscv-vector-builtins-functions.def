@@ -779,6 +779,8 @@ DEF_RVV_FUNCTION (vfwmaccbf16_frm, alu_frm, full_preds, f32_wwfv_ops)
 
 /* Zvfofp8min */
 #define REQUIRED_EXTENSIONS ZVFOFP8MIN_EXT
+DEF_RVV_FUNCTION (vfwcvt_f, alu_f8_to_bf16, full_preds, f8e4m3_to_bf16_f_v_ops)
+DEF_RVV_FUNCTION (vfwcvt_f, alu_f8_to_bf16, full_preds, f8e5m2_to_bf16_f_v_ops)
 DEF_RVV_FUNCTION (vreinterpret, misc, none_preds, f8e4m3_v_u_ops)
 DEF_RVV_FUNCTION (vreinterpret, misc, none_preds, u_v_f8e4m3_ops)
 DEF_RVV_FUNCTION (vreinterpret, misc, none_preds, f8e5m2_v_u_ops)

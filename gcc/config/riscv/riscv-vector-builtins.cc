@@ -250,6 +250,12 @@ static const rvv_type_info f32_ops[] = {
 #include "riscv-vector-builtins-types.def"
   {NUM_VECTOR_TYPES, 0}};
 
+/* A list of bfloat16 vector types for FP8 conversions.  */
+static const rvv_type_info fp8_bf16_ops[] = {
+#define DEF_RVV_FP8_BF16_OPS(TYPE, REQUIRE) {VECTOR_TYPE_##TYPE, REQUIRE},
+#include "riscv-vector-builtins-types.def"
+  {NUM_VECTOR_TYPES, 0}};
+
 /* A list of all integer will be registered for intrinsic functions.  */
 static const rvv_type_info iu_ops[] = {
 #define DEF_RVV_I_OPS(TYPE, REQUIRE) {VECTOR_TYPE_##TYPE, REQUIRE},
@@ -839,6 +845,16 @@ static constexpr const rvv_arg_type_info w_v_args[]
 /* A list of args for vector_type func (vector_type) function.  */
 static constexpr const rvv_arg_type_info bf_w_v_args[]
   = {rvv_arg_type_info (RVV_BASE_double_trunc_bfloat_vector),
+     rvv_arg_type_info_end};
+
+/* A list of args for vector_type func (vector_type) function.  */
+static constexpr const rvv_arg_type_info f8e4m3_w_v_args[]
+  = {rvv_arg_type_info (RVV_BASE_double_trunc_float8e4m3_vector),
+     rvv_arg_type_info_end};
+
+/* A list of args for vector_type func (vector_type) function.  */
+static constexpr const rvv_arg_type_info f8e5m2_w_v_args[]
+  = {rvv_arg_type_info (RVV_BASE_double_trunc_float8e5m2_vector),
      rvv_arg_type_info_end};
 
 /* A list of args for vector_type func (vector_type) function.  */
@@ -2075,6 +2091,22 @@ static constexpr const rvv_op_info bf16_to_f32_f_v_ops
      OP_TYPE_f_v,			  /* Suffix */
      rvv_arg_type_info (RVV_BASE_vector), /* Return type */
      bf_w_v_args /* Args */};
+
+/* A static operand information for vector_type func (vector_type)
+   function registration.  */
+static constexpr const rvv_op_info f8e4m3_to_bf16_f_v_ops
+  = {fp8_bf16_ops,			  /* Types.  */
+     OP_TYPE_f_v,			  /* Suffix.  */
+     rvv_arg_type_info (RVV_BASE_vector), /* Return type.  */
+     f8e4m3_w_v_args /* Args.  */};
+
+/* A static operand information for vector_type func (vector_type)
+   function registration.  */
+static constexpr const rvv_op_info f8e5m2_to_bf16_f_v_ops
+  = {fp8_bf16_ops,			  /* Types.  */
+     OP_TYPE_f_v,			  /* Suffix.  */
+     rvv_arg_type_info (RVV_BASE_vector), /* Return type.  */
+     f8e5m2_w_v_args /* Args.  */};
 
 /* A static operand information for vector_type func (vector_type, double demote
  * type, double demote type) function registration. */
@@ -3490,10 +3522,11 @@ static constexpr const function_type_info function_types[] = {
   QUAD_FIX_UNSIGNED, OCT_TRUNC, DOUBLE_TRUNC_SCALAR, DOUBLE_TRUNC_SIGNED,      \
   DOUBLE_TRUNC_UNSIGNED, DOUBLE_TRUNC_UNSIGNED_SCALAR,                         \
   DOUBLE_TRUNC_BFLOAT_SCALAR, DOUBLE_TRUNC_BFLOAT, DOUBLE_TRUNC_FLOAT,         \
-  FLOAT8E4M3, FLOAT8E5M2, FLOAT, LMUL1, WLMUL1, QLMUL1, QLMUL1_SIGNED,         \
-  QLMUL1_UNSIGNED, XFQF, EEW8_INTERPRET, EEW16_INTERPRET, EEW32_INTERPRET,     \
-  EEW64_INTERPRET, BOOL1_INTERPRET, BOOL2_INTERPRET, BOOL4_INTERPRET,          \
-  BOOL8_INTERPRET, BOOL16_INTERPRET, BOOL32_INTERPRET, BOOL64_INTERPRET,       \
+  DOUBLE_TRUNC_FLOAT8E4M3, DOUBLE_TRUNC_FLOAT8E5M2, FLOAT8E4M3, FLOAT8E5M2,    \
+  FLOAT, LMUL1, WLMUL1, QLMUL1, QLMUL1_SIGNED, QLMUL1_UNSIGNED, XFQF,          \
+  EEW8_INTERPRET, EEW16_INTERPRET, EEW32_INTERPRET, EEW64_INTERPRET,           \
+  BOOL1_INTERPRET, BOOL2_INTERPRET, BOOL4_INTERPRET, BOOL8_INTERPRET,          \
+  BOOL16_INTERPRET, BOOL32_INTERPRET, BOOL64_INTERPRET,                        \
   SIGNED_EEW8_LMUL1_INTERPRET, SIGNED_EEW16_LMUL1_INTERPRET,                   \
   SIGNED_EEW32_LMUL1_INTERPRET, SIGNED_EEW64_LMUL1_INTERPRET,                  \
   UNSIGNED_EEW8_LMUL1_INTERPRET, UNSIGNED_EEW16_LMUL1_INTERPRET,               \
@@ -3538,6 +3571,8 @@ static constexpr const function_type_info function_types[] = {
     VECTOR_TYPE_##DOUBLE_TRUNC_BFLOAT_SCALAR,                                  \
     VECTOR_TYPE_##DOUBLE_TRUNC_BFLOAT,                                         \
     VECTOR_TYPE_##DOUBLE_TRUNC_FLOAT,                                          \
+    VECTOR_TYPE_##DOUBLE_TRUNC_FLOAT8E4M3,                                     \
+    VECTOR_TYPE_##DOUBLE_TRUNC_FLOAT8E5M2,                                     \
     VECTOR_TYPE_##FLOAT8E4M3,                                                  \
     VECTOR_TYPE_##FLOAT8E5M2,                                                  \
     VECTOR_TYPE_##FLOAT,                                                       \
@@ -4115,6 +4150,8 @@ required_extensions_p (enum rvv_base_type type)
       case RVV_BASE_eew64_index:
       case RVV_BASE_float_vector:
       case RVV_BASE_double_trunc_float_vector:
+      case RVV_BASE_double_trunc_float8e4m3_vector:
+      case RVV_BASE_double_trunc_float8e5m2_vector:
       case RVV_BASE_float8e4m3_vector:
       case RVV_BASE_float8e5m2_vector:
       case RVV_BASE_double_trunc_vector:
@@ -4850,6 +4887,15 @@ function_expander::mask_mode (void) const
 rtx
 function_expander::use_exact_insn (insn_code icode)
 {
+  return use_exact_insn (icode, NULL_RTX);
+}
+
+/* Implement the call using instruction ICODE, with a 1:1 mapping between
+   arguments and input operands.  If ALTFMT is nonnull, add it as an explicit
+   VTYPE altfmt operand before any rounding-mode operand.  */
+rtx
+function_expander::use_exact_insn (insn_code icode, rtx altfmt)
+{
   machine_mode mode = TYPE_MODE (TREE_TYPE (exp));
 
   /* Record the offset to get the argument.  */
@@ -4893,6 +4939,9 @@ function_expander::use_exact_insn (insn_code icode)
   if (base->apply_vl_p ())
     add_input_operand (Pmode, get_avl_type_rtx (avl_type::NONVLMAX));
 
+  if (altfmt)
+    add_input_operand (Pmode, altfmt);
+
   if (base->has_rounding_mode_operand_p ())
     add_input_operand (call_expr_nargs (exp) - 2);
 
@@ -4903,6 +4952,13 @@ function_expander::use_exact_insn (insn_code icode)
     add_input_operand (Pmode, gen_int_mode (riscv_vector::FRM_DYN, Pmode));
 
   return generate_insn (icode);
+}
+
+/* Like use_exact_insn, but add an explicit VTYPE altfmt operand.  */
+rtx
+function_expander::use_exact_insn_with_altfmt (insn_code icode, uint8_t altfmt)
+{
+  return use_exact_insn (icode, gen_int_mode (altfmt, Pmode));
 }
 
 int
