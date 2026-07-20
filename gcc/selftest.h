@@ -252,6 +252,7 @@ extern void pub_sub_cc_tests ();
 extern void range_op_tests ();
 extern void range_tests ();
 extern void read_rtl_function_cc_tests ();
+extern void real_cc_tests ();
 extern void relation_tests ();
 extern void rtl_tests_cc_tests ();
 extern void sbitmap_cc_tests ();

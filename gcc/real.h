@@ -386,6 +386,8 @@ extern const struct real_format decimal_quad_format;
 extern const struct real_format ieee_half_format;
 extern const struct real_format arm_half_format;
 extern const struct real_format arm_bfloat_half_format;
+extern const struct real_format float8_e4m3_format;
+extern const struct real_format float8_e5m2_format;
 
 
 /* ====================================================================== */

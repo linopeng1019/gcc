@@ -31,6 +31,7 @@
 #include "vr-values.h"
 #include "realmpfr.h"
 #include "dfp.h"
+#include "selftest.h"
 
 /* The floating point model used internally is not exactly IEEE 754
    compliant, and close to the description in the ISO C99 standard,
@@ -4985,6 +4986,205 @@ decode_arm_bfloat_half (const struct real_format *fmt, REAL_VALUE_TYPE *r,
     }
 }
 
+/* Encode OCP float8_e4m3 (1 sign, 4 exp, 3 mantissa, bias 7).  Unlike
+   the reserved-exponent formats above, only the single all-ones-mantissa
+   pattern at the maximum exponent is a NaN; every other mantissa value
+   at that exponent is an ordinary (extended-range) normal number, and
+   there is no infinity at all.  */
+static void
+encode_float8_e4m3 (const struct real_format *fmt ATTRIBUTE_UNUSED, long *buf,
+		     const REAL_VALUE_TYPE *r)
+{
+  unsigned long image, sig, exp;
+  unsigned long sign = r->sign;
+
+  image = sign << 7;
+  sig = (r->sig[SIGSZ-1] >> (HOST_BITS_PER_LONG - 4)) & 0x7;
+
+  switch (r->cl)
+    {
+    case rvc_zero:
+      break;
+
+    case rvc_inf:
+      /* No infinity in this format: saturate to the largest finite
+	 magnitude (exp=1111, mant=110 -> 448), not 0x7f, which would
+	 collide with the single reserved NaN pattern (mant=111).  */
+      image |= (0xf << 3) | 0x6;
+      break;
+
+    case rvc_nan:
+      /* Exactly one NaN encoding per sign (S.1111.111); always quiet.  */
+      image |= (0xf << 3) | 0x7;
+      break;
+
+    case rvc_normal:
+      if (real_isdenormal (r))
+	exp = 0;
+      else
+	exp = REAL_EXP (r) + 7 - 1;
+      /* The (b=2, p=4, emax=9) model admits 0.1111 * 2^9 = 480, but its
+	 encoding (S.1111.111) is the reserved NaN pattern.  Saturate it
+	 to the largest finite magnitude 448 instead, matching the
+	 saturating conversion semantics of the format.  */
+      if (exp == 0xf && sig == 0x7)
+	sig = 0x6;
+      image |= exp << 3;
+      image |= sig;
+      break;
+
+    default:
+      gcc_unreachable ();
+    }
+
+  buf[0] = image;
+}
+
+/* Decode OCP float8_e4m3.  */
+static void
+decode_float8_e4m3 (const struct real_format *fmt, REAL_VALUE_TYPE *r,
+		     const long *buf)
+{
+  unsigned long image = buf[0] & 0xff;
+  bool sign = (image >> 7) & 1;
+  int exp = (image >> 3) & 0xf;
+  int mant_field = image & 0x7;
+
+  memset (r, 0, sizeof (*r));
+  image <<= HOST_BITS_PER_LONG - 4;
+  image &= ~SIG_MSB;
+
+  if (exp == 0)
+    {
+      if (image && fmt->has_denorm)
+	{
+	  r->cl = rvc_normal;
+	  r->sign = sign;
+	  SET_REAL_EXP (r, -6);
+	  r->sig[SIGSZ-1] = image << 1;
+	  normalize (r);
+	}
+      else if (fmt->has_signed_zero)
+	r->sign = sign;
+    }
+  else if (exp == 0xf && mant_field == 0x7)
+    {
+      r->cl = rvc_nan;
+      r->sign = sign;
+      r->signalling = false;
+      r->sig[SIGSZ-1] = image;
+    }
+  else
+    {
+      r->cl = rvc_normal;
+      r->sign = sign;
+      SET_REAL_EXP (r, exp - 7 + 1);
+      r->sig[SIGSZ-1] = image | SIG_MSB;
+    }
+}
+
+/* Encode OCP float8_e5m2 (1 sign, 5 exp, 2 mantissa, bias 15).  Same
+   reserved-top-exponent shape as ieee_half, just narrower.  */
+static void
+encode_float8_e5m2 (const struct real_format *fmt, long *buf,
+		     const REAL_VALUE_TYPE *r)
+{
+  unsigned long image, sig, exp;
+  unsigned long sign = r->sign;
+
+  image = sign << 7;
+  sig = (r->sig[SIGSZ-1] >> (HOST_BITS_PER_LONG - 3)) & 0x3;
+
+  switch (r->cl)
+    {
+    case rvc_zero:
+      break;
+
+    case rvc_inf:
+      image |= 0x1f << 2;
+      break;
+
+    case rvc_nan:
+      if (r->canonical)
+	sig = (fmt->canonical_nan_lsbs_set ? (1 << 1) - 1 : 0);
+      if (r->signalling == fmt->qnan_msb_set)
+	sig &= ~(1 << 1);
+      else
+	sig |= 1 << 1;
+      if (sig == 0)
+	sig = 1;
+
+      image |= 0x1f << 2;
+      image |= sig;
+      break;
+
+    case rvc_normal:
+      if (real_isdenormal (r))
+	exp = 0;
+      else
+	exp = REAL_EXP (r) + 15 - 1;
+      image |= exp << 2;
+      image |= sig;
+      break;
+
+    default:
+      gcc_unreachable ();
+    }
+
+  buf[0] = image;
+}
+
+/* Decode OCP float8_e5m2.  */
+static void
+decode_float8_e5m2 (const struct real_format *fmt, REAL_VALUE_TYPE *r,
+		     const long *buf)
+{
+  unsigned long image = buf[0] & 0xff;
+  bool sign = (image >> 7) & 1;
+  int exp = (image >> 2) & 0x1f;
+
+  memset (r, 0, sizeof (*r));
+  image <<= HOST_BITS_PER_LONG - 3;
+  image &= ~SIG_MSB;
+
+  if (exp == 0)
+    {
+      if (image && fmt->has_denorm)
+	{
+	  r->cl = rvc_normal;
+	  r->sign = sign;
+	  SET_REAL_EXP (r, -14);
+	  r->sig[SIGSZ-1] = image << 1;
+	  normalize (r);
+	}
+      else if (fmt->has_signed_zero)
+	r->sign = sign;
+    }
+  else if (exp == 0x1f)
+    {
+      if (image)
+	{
+	  r->cl = rvc_nan;
+	  r->sign = sign;
+	  r->signalling = (((image >> (HOST_BITS_PER_LONG - 2)) & 1)
+			   ^ fmt->qnan_msb_set);
+	  r->sig[SIGSZ-1] = image;
+	}
+      else
+	{
+	  r->cl = rvc_inf;
+	  r->sign = sign;
+	}
+    }
+  else
+    {
+      r->cl = rvc_normal;
+      r->sign = sign;
+      SET_REAL_EXP (r, exp - 15 + 1);
+      r->sig[SIGSZ-1] = image | SIG_MSB;
+    }
+}
+
 /* Half-precision format, as specified in IEEE 754R.  */
 const struct real_format ieee_half_format =
   {
@@ -5059,6 +5259,59 @@ const struct real_format arm_bfloat_half_format =
     true,
     false,
     "arm_bfloat_half"
+  };
+
+/* OCP 8-bit floating-point format, 4 exponent bits, 3 mantissa bits.
+   Not an IEEE 754 format: no infinity, and only a single reserved NaN
+   encoding (S.1111.111); every other pattern at the top exponent is an
+   ordinary finite value, up to a max magnitude of 448.  */
+const struct real_format float8_e4m3_format =
+  {
+    encode_float8_e4m3,
+    decode_float8_e4m3,
+    2,
+    4,
+    4,
+    -5,
+    9,
+    7,
+    7,
+    0,
+    false,
+    true,
+    true,
+    false,
+    true,
+    true,
+    true,
+    true,
+    "float8_e4m3"
+  };
+
+/* OCP 8-bit floating-point format, 5 exponent bits, 2 mantissa bits.
+   Structurally a narrow ieee_half: standard reserved top exponent for
+   inf (mantissa==0) and NaN (mantissa!=0).  */
+const struct real_format float8_e5m2_format =
+  {
+    encode_float8_e5m2,
+    decode_float8_e5m2,
+    2,
+    3,
+    3,
+    -13,
+    16,
+    7,
+    7,
+    0,
+    false,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    false,
+    "float8_e5m2"
   };
 
 
@@ -5665,3 +5918,149 @@ build_sinatan_real (REAL_VALUE_TYPE * r, tree type)
 
   mpfr_clears (mpfr_const1, mpfr_c, mpfr_maxval, NULL);
 }
+
+#if CHECKING_P
+
+namespace selftest {
+
+/* Round-trip every byte pattern through FMT's decode then encode and
+   check we get the same bits back, except for non-canonical NaN
+   encodings (which collapse to a canonical NaN on re-encode, same as
+   every other multi-NaN-pattern format in this file).  Go through
+   real_from_target/real_to_target (like every real caller does), not
+   the raw fmt->decode/encode function pointers directly: encode() is
+   only ever called on a value that's already been round_for_format'd
+   (that's what puts denormals into the internal "denormal" marker
+   state encode()'s real_isdenormal check expects), and real_to_target
+   is what applies that step.  */
+
+static void
+float8_verify_roundtrip (const struct real_format *fmt)
+{
+  for (int b = 0; b < 256; b++)
+    {
+      long buf = b;
+      REAL_VALUE_TYPE r;
+      real_from_target (&r, &buf, fmt);
+      if (r.cl == rvc_nan)
+	continue;
+      long buf2 = real_to_target (NULL, &r, fmt);
+      ASSERT_EQ (buf2 & 0xff, b);
+    }
+}
+
+/* Verify the OCP float8_e4m3 format: no infinity, a single reserved NaN
+   encoding per sign, max finite magnitude 448.  */
+
+static void
+float8_e4m3_cc_tests ()
+{
+  float8_verify_roundtrip (&float8_e4m3_format);
+
+  REAL_VALUE_TYPE r;
+  long buf;
+
+  buf = 0x00; /* +0.  */
+  float8_e4m3_format.decode (&float8_e4m3_format, &r, &buf);
+  ASSERT_EQ (r.cl, rvc_zero);
+
+  buf = 0x7e; /* 0.1111.110 -- max finite, 448.  */
+  float8_e4m3_format.decode (&float8_e4m3_format, &r, &buf);
+  ASSERT_EQ (r.cl, rvc_normal);
+  ASSERT_EQ (real_to_integer (&r), 448);
+
+  buf = 0x7f; /* 0.1111.111 -- the single reserved NaN pattern.  */
+  float8_e4m3_format.decode (&float8_e4m3_format, &r, &buf);
+  ASSERT_EQ (r.cl, rvc_nan);
+
+  buf = 0xff; /* 1.1111.111 -- NaN, other sign; no inf exists to confuse it with.  */
+  float8_e4m3_format.decode (&float8_e4m3_format, &r, &buf);
+  ASSERT_EQ (r.cl, rvc_nan);
+
+  buf = 0x01; /* smallest subnormal.  */
+  float8_e4m3_format.decode (&float8_e4m3_format, &r, &buf);
+  ASSERT_EQ (r.cl, rvc_normal);
+  ASSERT_TRUE (REAL_EXP (&r) < float8_e4m3_format.emin);
+
+  /* Encode direction.  448 is the max finite value.  */
+  real_from_integer (&r, VOIDmode, 448, SIGNED);
+  ASSERT_EQ (real_to_target (NULL, &r, &float8_e4m3_format) & 0xff, 0x7e);
+
+  /* 480 = 0.1111 * 2^9 fits the (p=4, emax=9) model but its encoding is
+     the reserved NaN pattern; it must saturate to 448, not become NaN.  */
+  real_from_integer (&r, VOIDmode, 480, SIGNED);
+  ASSERT_EQ (real_to_target (NULL, &r, &float8_e4m3_format) & 0xff, 0x7e);
+  real_from_integer (&r, VOIDmode, -480, SIGNED);
+  ASSERT_EQ (real_to_target (NULL, &r, &float8_e4m3_format) & 0xff, 0xfe);
+
+  /* Values past the model max overflow to inf internally, which this
+     format saturates to max finite.  */
+  real_from_integer (&r, VOIDmode, 10000, SIGNED);
+  ASSERT_EQ (real_to_target (NULL, &r, &float8_e4m3_format) & 0xff, 0x7e);
+  real_inf (&r);
+  ASSERT_EQ (real_to_target (NULL, &r, &float8_e4m3_format) & 0xff, 0x7e);
+
+  /* NaN encodes to the single reserved pattern.  */
+  ASSERT_TRUE (real_nan (&r, "", 1, DFmode));
+  ASSERT_EQ (real_to_target (NULL, &r, &float8_e4m3_format) & 0xff, 0x7f);
+}
+
+/* Verify the OCP float8_e5m2 format: standard reserved-top-exponent
+   inf/NaN split, max finite magnitude 57344.  */
+
+static void
+float8_e5m2_cc_tests ()
+{
+  float8_verify_roundtrip (&float8_e5m2_format);
+
+  REAL_VALUE_TYPE r;
+  long buf;
+
+  buf = 0x00; /* +0.  */
+  float8_e5m2_format.decode (&float8_e5m2_format, &r, &buf);
+  ASSERT_EQ (r.cl, rvc_zero);
+
+  buf = 0x7b; /* 0.11110.11 -- max finite, 57344.  */
+  float8_e5m2_format.decode (&float8_e5m2_format, &r, &buf);
+  ASSERT_EQ (r.cl, rvc_normal);
+  ASSERT_EQ (real_to_integer (&r), 57344);
+
+  buf = 0x7c; /* 0.11111.00 -- +inf.  */
+  float8_e5m2_format.decode (&float8_e5m2_format, &r, &buf);
+  ASSERT_EQ (r.cl, rvc_inf);
+
+  buf = 0xfc; /* 1.11111.00 -- -inf.  */
+  float8_e5m2_format.decode (&float8_e5m2_format, &r, &buf);
+  ASSERT_EQ (r.cl, rvc_inf);
+  ASSERT_TRUE (r.sign);
+
+  buf = 0x7d; /* 0.11111.01 -- NaN.  */
+  float8_e5m2_format.decode (&float8_e5m2_format, &r, &buf);
+  ASSERT_EQ (r.cl, rvc_nan);
+
+  buf = 0x01; /* smallest subnormal.  */
+  float8_e5m2_format.decode (&float8_e5m2_format, &r, &buf);
+  ASSERT_EQ (r.cl, rvc_normal);
+  ASSERT_TRUE (REAL_EXP (&r) < float8_e5m2_format.emin);
+
+  /* Encode direction.  Max finite, and IEEE-style overflow to inf.  */
+  real_from_integer (&r, VOIDmode, 57344, SIGNED);
+  ASSERT_EQ (real_to_target (NULL, &r, &float8_e5m2_format) & 0xff, 0x7b);
+  real_from_integer (&r, VOIDmode, 100000, SIGNED);
+  ASSERT_EQ (real_to_target (NULL, &r, &float8_e5m2_format) & 0xff, 0x7c);
+  real_inf (&r);
+  ASSERT_EQ (real_to_target (NULL, &r, &float8_e5m2_format) & 0xff, 0x7c);
+}
+
+/* Run all of the selftests within this file.  */
+
+void
+real_cc_tests ()
+{
+  float8_e4m3_cc_tests ();
+  float8_e5m2_cc_tests ();
+}
+
+} // namespace selftest
+
+#endif /* CHECKING_P */
