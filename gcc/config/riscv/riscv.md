@@ -101,8 +101,8 @@
   UNSPEC_SSP_SET
   UNSPEC_SSP_TEST
 
-  ;; Zvfofp8min
-  UNSPEC_F8
+  ;; Zvfofp8min saturating narrowing conversions (no RTL code exists
+  ;; for a saturating float truncation).
   UNSPEC_F8_SAT
 ])
 

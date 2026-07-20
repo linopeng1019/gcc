@@ -4940,15 +4940,6 @@ function_expander::mask_mode (void) const
 rtx
 function_expander::use_exact_insn (insn_code icode)
 {
-  return use_exact_insn (icode, NULL_RTX);
-}
-
-/* Implement the call using instruction ICODE, with a 1:1 mapping between
-   arguments and input operands.  If ALTFMT is nonnull, add it as an explicit
-   VTYPE altfmt operand before any rounding-mode operand.  */
-rtx
-function_expander::use_exact_insn (insn_code icode, rtx altfmt)
-{
   machine_mode mode = TYPE_MODE (TREE_TYPE (exp));
 
   /* Record the offset to get the argument.  */
@@ -4992,9 +4983,6 @@ function_expander::use_exact_insn (insn_code icode, rtx altfmt)
   if (base->apply_vl_p ())
     add_input_operand (Pmode, get_avl_type_rtx (avl_type::NONVLMAX));
 
-  if (altfmt)
-    add_input_operand (Pmode, altfmt);
-
   if (base->has_rounding_mode_operand_p ())
     add_input_operand (call_expr_nargs (exp) - 2);
 
@@ -5005,13 +4993,6 @@ function_expander::use_exact_insn (insn_code icode, rtx altfmt)
     add_input_operand (Pmode, gen_int_mode (riscv_vector::FRM_DYN, Pmode));
 
   return generate_insn (icode);
-}
-
-/* Like use_exact_insn, but add an explicit VTYPE altfmt operand.  */
-rtx
-function_expander::use_exact_insn_with_altfmt (insn_code icode, uint8_t altfmt)
-{
-  return use_exact_insn (icode, gen_int_mode (altfmt, Pmode));
 }
 
 int

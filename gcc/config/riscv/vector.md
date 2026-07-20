@@ -61,8 +61,9 @@
 	(const_string "false")))
 
 ;; Alternate FP8 format requirement.  Most instructions do not care, so
-;; the attribute defaults to INVALID_ATTRIBUTE; FP8 instructions set it to
-;; ALTFMT_NONE (E4M3) or ALTFMT_ALT (E5M2) via an operand.
+;; the attribute defaults to INVALID_ATTRIBUTE; the FP8 conversion insns
+;; set it to ALTFMT_NONE (E4M3) or ALTFMT_ALT (E5M2), derived from their
+;; FP8 vector mode (see vector-float8.md).
 (define_attr "altfmt" ""
   (const_int INVALID_ATTRIBUTE))
 

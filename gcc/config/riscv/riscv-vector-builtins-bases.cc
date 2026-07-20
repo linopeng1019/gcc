@@ -59,21 +59,29 @@ enum lst_type
   LST_INDEXED,
 };
 
-/* Return ALTFMT_NONE / ALTFMT_ALT for an FP8 vector base type, or
-   INVALID_ATTRIBUTE if BT is not an FP8 base type.  */
-static uint8_t
-fp8_base_type_altfmt (enum rvv_base_type bt)
+/* Classification of FP8 conversion operand/result base types, used to
+   pick between the per-format conversion insns (which differ only in
+   their constant "altfmt" attribute).  */
+enum fp8_format
+{
+  FP8_FORMAT_E4M3,
+  FP8_FORMAT_E5M2,
+  NOT_FP8
+};
+
+static enum fp8_format
+fp8_base_type_format (enum rvv_base_type bt)
 {
   switch (bt)
     {
     case RVV_BASE_double_trunc_float8e4m3_vector:
     case RVV_BASE_quad_trunc_float8e4m3_vector:
-      return ALTFMT_NONE;
+      return FP8_FORMAT_E4M3;
     case RVV_BASE_double_trunc_float8e5m2_vector:
     case RVV_BASE_quad_trunc_float8e5m2_vector:
-      return ALTFMT_ALT;
+      return FP8_FORMAT_E5M2;
     default:
-      return INVALID_ATTRIBUTE;
+      return NOT_FP8;
     }
 }
 
@@ -1546,13 +1554,17 @@ public:
   {
     if (e.op_info->op == OP_TYPE_f_v)
       {
-	uint8_t fp8_altfmt
-	  = fp8_base_type_altfmt (e.op_info->args[0].base_type);
-	if (fp8_altfmt != INVALID_ATTRIBUTE)
-	  return e.use_exact_insn_with_altfmt (code_for_pred_extend_float8_to (
-						 e.vector_mode ()),
-					       fp8_altfmt);
-	return e.use_exact_insn (code_for_pred_extend (e.vector_mode ()));
+	switch (fp8_base_type_format (e.op_info->args[0].base_type))
+	  {
+	  case FP8_FORMAT_E4M3:
+	    return e.use_exact_insn (
+	      code_for_pred_extend_f8e4m3_to (e.vector_mode ()));
+	  case FP8_FORMAT_E5M2:
+	    return e.use_exact_insn (
+	      code_for_pred_extend_f8e5m2_to (e.vector_mode ()));
+	  default:
+	    return e.use_exact_insn (code_for_pred_extend (e.vector_mode ()));
+	  }
       }
     if (e.op_info->op == OP_TYPE_x_v)
       return e.use_exact_insn (code_for_pred_widen (FLOAT, e.vector_mode ()));
@@ -1608,21 +1620,31 @@ public:
   {
     if (e.op_info->op == OP_TYPE_f_w)
       {
-	uint8_t fp8_altfmt
-	  = fp8_base_type_altfmt (e.op_info->ret.base_type);
-	if (fp8_altfmt != INVALID_ATTRIBUTE)
-	  return e.use_exact_insn_with_altfmt (code_for_pred_trunc_to_float8 (
-						 e.vector_mode ()),
-					       fp8_altfmt);
-	return e.use_exact_insn (code_for_pred_trunc (e.vector_mode ()));
+	switch (fp8_base_type_format (e.op_info->ret.base_type))
+	  {
+	  case FP8_FORMAT_E4M3:
+	    return e.use_exact_insn (
+	      code_for_pred_trunc_to_f8e4m3 (e.vector_mode ()));
+	  case FP8_FORMAT_E5M2:
+	    return e.use_exact_insn (
+	      code_for_pred_trunc_to_f8e5m2 (e.vector_mode ()));
+	  default:
+	    return e.use_exact_insn (code_for_pred_trunc (e.vector_mode ()));
+	  }
       }
     if (e.op_info->op == OP_TYPE_f_q)
       {
-	uint8_t fp8_altfmt
-	  = fp8_base_type_altfmt (e.op_info->ret.base_type);
-	if (fp8_altfmt != INVALID_ATTRIBUTE)
-	  return e.use_exact_insn_with_altfmt (
-	    code_for_pred_quad_trunc_to_float8 (e.vector_mode ()), fp8_altfmt);
+	switch (fp8_base_type_format (e.op_info->ret.base_type))
+	  {
+	  case FP8_FORMAT_E4M3:
+	    return e.use_exact_insn (
+	      code_for_pred_quad_trunc_to_f8e4m3 (e.vector_mode ()));
+	  case FP8_FORMAT_E5M2:
+	    return e.use_exact_insn (
+	      code_for_pred_quad_trunc_to_f8e5m2 (e.vector_mode ()));
+	  default:
+	    break;
+	  }
       }
     if (e.op_info->op == OP_TYPE_x_w)
       return e.use_exact_insn (code_for_pred_narrow (FLOAT, e.arg_mode (0)));
@@ -1647,14 +1669,19 @@ public:
 
   rtx expand (function_expander &e) const override
   {
-    uint8_t fp8_altfmt = fp8_base_type_altfmt (e.op_info->ret.base_type);
-    if (e.op_info->op == OP_TYPE_f_q && fp8_altfmt != INVALID_ATTRIBUTE)
-      return e.use_exact_insn_with_altfmt (
-	code_for_pred_quad_trunc_to_float8_sat (e.vector_mode ()), fp8_altfmt);
-    if (e.op_info->op == OP_TYPE_f_w && fp8_altfmt != INVALID_ATTRIBUTE)
-      return e.use_exact_insn_with_altfmt (code_for_pred_trunc_to_float8_sat (
-					     e.vector_mode ()),
-					   fp8_altfmt);
+    enum fp8_format fmt = fp8_base_type_format (e.op_info->ret.base_type);
+    if (e.op_info->op == OP_TYPE_f_w && fmt == FP8_FORMAT_E4M3)
+      return e.use_exact_insn (
+	code_for_pred_trunc_to_f8e4m3_sat (e.vector_mode ()));
+    if (e.op_info->op == OP_TYPE_f_w && fmt == FP8_FORMAT_E5M2)
+      return e.use_exact_insn (
+	code_for_pred_trunc_to_f8e5m2_sat (e.vector_mode ()));
+    if (e.op_info->op == OP_TYPE_f_q && fmt == FP8_FORMAT_E4M3)
+      return e.use_exact_insn (
+	code_for_pred_quad_trunc_to_f8e4m3_sat (e.vector_mode ()));
+    if (e.op_info->op == OP_TYPE_f_q && fmt == FP8_FORMAT_E5M2)
+      return e.use_exact_insn (
+	code_for_pred_quad_trunc_to_f8e5m2_sat (e.vector_mode ()));
     gcc_unreachable ();
   }
 };
