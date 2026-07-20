@@ -252,6 +252,8 @@ Mask(VECTOR_ELEN_FP_16) Var(riscv_vector_elen_flags)
 
 Mask(VECTOR_ELEN_BF_16) Var(riscv_vector_elen_flags)
 
+Mask(VECTOR_ELEN_FP_8)  Var(riscv_vector_elen_flags)
+
 TargetVariable
 int riscv_fmv_priority = 0
 

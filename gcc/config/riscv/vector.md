@@ -98,6 +98,10 @@
 (define_attr "sew" ""
   (cond [(eq_attr "mode" "RVVMF8BI,RVVMF4BI,RVVMF2BI,RVVM1BI,\
 			  RVVM8QI,RVVM4QI,RVVM2QI,RVVM1QI,RVVMF2QI,RVVMF4QI,RVVMF8QI,\
+			  RVVM8FP8E4M3,RVVM4FP8E4M3,RVVM2FP8E4M3,RVVM1FP8E4M3,\
+			  RVVMF2FP8E4M3,RVVMF4FP8E4M3,RVVMF8FP8E4M3,\
+			  RVVM8FP8E5M2,RVVM4FP8E5M2,RVVM2FP8E5M2,RVVM1FP8E5M2,\
+			  RVVMF2FP8E5M2,RVVMF4FP8E5M2,RVVMF8FP8E5M2,\
 			  RVVM1x8QI,RVVMF2x8QI,RVVMF4x8QI,RVVMF8x8QI,\
 			  RVVM1x7QI,RVVMF2x7QI,RVVMF4x7QI,RVVMF8x7QI,\
 			  RVVM1x6QI,RVVMF2x6QI,RVVMF4x6QI,RVVMF8x6QI,\
@@ -192,6 +196,20 @@
 	 (eq_attr "mode" "RVVMF2QI,RVVMF16BI") (symbol_ref "TARGET_XTHEADVECTOR ? riscv_vector::LMUL_1 : riscv_vector::LMUL_F2")
 	 (eq_attr "mode" "RVVMF4QI,RVVMF32BI") (symbol_ref "TARGET_XTHEADVECTOR ? riscv_vector::LMUL_1 : riscv_vector::LMUL_F4")
 	 (eq_attr "mode" "RVVMF8QI,RVVMF64BI") (symbol_ref "TARGET_XTHEADVECTOR ? riscv_vector::LMUL_1 : riscv_vector::LMUL_F8")
+	 (eq_attr "mode" "RVVM8FP8E4M3") (symbol_ref "riscv_vector::LMUL_8")
+	 (eq_attr "mode" "RVVM4FP8E4M3") (symbol_ref "riscv_vector::LMUL_4")
+	 (eq_attr "mode" "RVVM2FP8E4M3") (symbol_ref "riscv_vector::LMUL_2")
+	 (eq_attr "mode" "RVVM1FP8E4M3") (symbol_ref "riscv_vector::LMUL_1")
+	 (eq_attr "mode" "RVVMF2FP8E4M3") (symbol_ref "riscv_vector::LMUL_F2")
+	 (eq_attr "mode" "RVVMF4FP8E4M3") (symbol_ref "riscv_vector::LMUL_F4")
+	 (eq_attr "mode" "RVVMF8FP8E4M3") (symbol_ref "riscv_vector::LMUL_F8")
+	 (eq_attr "mode" "RVVM8FP8E5M2") (symbol_ref "riscv_vector::LMUL_8")
+	 (eq_attr "mode" "RVVM4FP8E5M2") (symbol_ref "riscv_vector::LMUL_4")
+	 (eq_attr "mode" "RVVM2FP8E5M2") (symbol_ref "riscv_vector::LMUL_2")
+	 (eq_attr "mode" "RVVM1FP8E5M2") (symbol_ref "riscv_vector::LMUL_1")
+	 (eq_attr "mode" "RVVMF2FP8E5M2") (symbol_ref "riscv_vector::LMUL_F2")
+	 (eq_attr "mode" "RVVMF4FP8E5M2") (symbol_ref "riscv_vector::LMUL_F4")
+	 (eq_attr "mode" "RVVMF8FP8E5M2") (symbol_ref "riscv_vector::LMUL_F8")
 	 (eq_attr "mode" "RVVM8HI") (symbol_ref "riscv_vector::LMUL_8")
 	 (eq_attr "mode" "RVVM4HI") (symbol_ref "riscv_vector::LMUL_4")
 	 (eq_attr "mode" "RVVM2HI") (symbol_ref "riscv_vector::LMUL_2")
@@ -520,6 +538,20 @@
 	 (eq_attr "mode" "RVVMF2QI,RVVMF16BI") (const_int 16)
 	 (eq_attr "mode" "RVVMF4QI,RVVMF32BI") (const_int 32)
 	 (eq_attr "mode" "RVVMF8QI,RVVMF64BI") (const_int 64)
+	 (eq_attr "mode" "RVVM8FP8E4M3") (const_int 1)
+	 (eq_attr "mode" "RVVM4FP8E4M3") (const_int 2)
+	 (eq_attr "mode" "RVVM2FP8E4M3") (const_int 4)
+	 (eq_attr "mode" "RVVM1FP8E4M3") (const_int 8)
+	 (eq_attr "mode" "RVVMF2FP8E4M3") (const_int 16)
+	 (eq_attr "mode" "RVVMF4FP8E4M3") (const_int 32)
+	 (eq_attr "mode" "RVVMF8FP8E4M3") (const_int 64)
+	 (eq_attr "mode" "RVVM8FP8E5M2") (const_int 1)
+	 (eq_attr "mode" "RVVM4FP8E5M2") (const_int 2)
+	 (eq_attr "mode" "RVVM2FP8E5M2") (const_int 4)
+	 (eq_attr "mode" "RVVM1FP8E5M2") (const_int 8)
+	 (eq_attr "mode" "RVVMF2FP8E5M2") (const_int 16)
+	 (eq_attr "mode" "RVVMF4FP8E5M2") (const_int 32)
+	 (eq_attr "mode" "RVVMF8FP8E5M2") (const_int 64)
 	 (eq_attr "mode" "RVVM8HI") (const_int 2)
 	 (eq_attr "mode" "RVVM4HI") (const_int 4)
 	 (eq_attr "mode" "RVVM2HI") (const_int 8)

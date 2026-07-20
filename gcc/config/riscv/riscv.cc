@@ -13136,7 +13136,7 @@ riscv_mangle_type (const_tree type)
 static bool
 riscv_scalar_mode_supported_p (scalar_mode mode)
 {
-  if (mode == HFmode || mode == BFmode)
+  if (mode == HFmode || mode == BFmode || mode == FP8E4M3mode || mode == FP8E5M2mode)
     return true;
   else
     return default_scalar_mode_supported_p (mode);
@@ -13144,7 +13144,18 @@ riscv_scalar_mode_supported_p (scalar_mode mode)
 
 /* Implement TARGET_LIBGCC_FLOATING_MODE_SUPPORTED_P - return TRUE
    if MODE is HFmode or BFmode, and punt to the generic implementation
-   otherwise.  */
+   otherwise.
+
+   FP8E4M3/FP8E5M2 are deliberately NOT included here, unlike in
+   riscv_scalar_mode_supported_p above: Zvfofp8min is conversion-only
+   (no FP8 arithmetic), so libgcc has no soft-float support routines
+   for these modes and shouldn't claim to.  Returning true here made
+   every scalar float mode "libgcc-supported", including FP8E4M3/
+   FP8E5M2, which made c_cpp_builtins's FOR_EACH_MODE_IN_CLASS
+   (MODE_FLOAT) loop in c-family/c-cppbuiltin.cc try to find a
+   standard C type name (float/double/long double/_FloatN) for them
+   while building libgcc -- there isn't one, so it ICEs on
+   gcc_assert (found_suffix).  */
 
 static bool
 riscv_libgcc_floating_mode_supported_p (scalar_float_mode mode)
