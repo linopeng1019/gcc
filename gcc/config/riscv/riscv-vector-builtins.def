@@ -441,35 +441,36 @@ DEF_RVV_TYPE (vint64m8_t, 15, __rvv_int64m8_t, int64, RVVM8DI, _i64m8, _i64,
 DEF_RVV_TYPE (vuint64m8_t, 16, __rvv_uint64m8_t, uint64, RVVM8DI, _u64m8, _u64,
 	      _e64m8)
 
-/* Enabled if TARGET_ZVFOFP8MIN.  */
-DEF_RVV_TYPE (vfloat8e4m3mf8_t, 21, __rvv_float8e4m3mf8_t, uint8, RVVMF8QI,
-	      _f8e4m3mf8, _f8e4m3, _e8mf8)
-DEF_RVV_TYPE (vfloat8e4m3mf4_t, 21, __rvv_float8e4m3mf4_t, uint8, RVVMF4QI,
-	      _f8e4m3mf4, _f8e4m3, _e8mf4)
-DEF_RVV_TYPE (vfloat8e4m3mf2_t, 21, __rvv_float8e4m3mf2_t, uint8, RVVMF2QI,
-	      _f8e4m3mf2, _f8e4m3, _e8mf2)
-DEF_RVV_TYPE (vfloat8e4m3m1_t, 20, __rvv_float8e4m3m1_t, uint8, RVVM1QI,
-	      _f8e4m3m1, _f8e4m3, _e8m1)
-DEF_RVV_TYPE (vfloat8e4m3m2_t, 20, __rvv_float8e4m3m2_t, uint8, RVVM2QI,
-	      _f8e4m3m2, _f8e4m3, _e8m2)
-DEF_RVV_TYPE (vfloat8e4m3m4_t, 20, __rvv_float8e4m3m4_t, uint8, RVVM4QI,
-	      _f8e4m3m4, _f8e4m3, _e8m4)
-DEF_RVV_TYPE (vfloat8e4m3m8_t, 20, __rvv_float8e4m3m8_t, uint8, RVVM8QI,
-	      _f8e4m3m8, _f8e4m3, _e8m8)
-DEF_RVV_TYPE (vfloat8e5m2mf8_t, 21, __rvv_float8e5m2mf8_t, uint8, RVVMF8QI,
-	      _f8e5m2mf8, _f8e5m2, _e8mf8)
-DEF_RVV_TYPE (vfloat8e5m2mf4_t, 21, __rvv_float8e5m2mf4_t, uint8, RVVMF4QI,
-	      _f8e5m2mf4, _f8e5m2, _e8mf4)
-DEF_RVV_TYPE (vfloat8e5m2mf2_t, 21, __rvv_float8e5m2mf2_t, uint8, RVVMF2QI,
-	      _f8e5m2mf2, _f8e5m2, _e8mf2)
-DEF_RVV_TYPE (vfloat8e5m2m1_t, 20, __rvv_float8e5m2m1_t, uint8, RVVM1QI,
-	      _f8e5m2m1, _f8e5m2, _e8m1)
-DEF_RVV_TYPE (vfloat8e5m2m2_t, 20, __rvv_float8e5m2m2_t, uint8, RVVM2QI,
-	      _f8e5m2m2, _f8e5m2, _e8m2)
-DEF_RVV_TYPE (vfloat8e5m2m4_t, 20, __rvv_float8e5m2m4_t, uint8, RVVM4QI,
-	      _f8e5m2m4, _f8e5m2, _e8m4)
-DEF_RVV_TYPE (vfloat8e5m2m8_t, 20, __rvv_float8e5m2m8_t, uint8, RVVM8QI,
-	      _f8e5m2m8, _f8e5m2, _e8m8)
+/* Enabled if TARGET_ZVFOFP8MIN.  FP8E4M3 = OCP float8_e4m3, FP8E5M2 = OCP
+   float8_e5m2 -- dedicated FP8 real modes, not shared with vuint8.  */
+DEF_RVV_TYPE (vfloat8e4m3mf8_t, 21, __rvv_float8e4m3mf8_t, float8e4m3,
+	      RVVMF8FP8E4M3, _f8e4m3mf8, _f8e4m3, _e8mf8)
+DEF_RVV_TYPE (vfloat8e4m3mf4_t, 21, __rvv_float8e4m3mf4_t, float8e4m3,
+	      RVVMF4FP8E4M3, _f8e4m3mf4, _f8e4m3, _e8mf4)
+DEF_RVV_TYPE (vfloat8e4m3mf2_t, 21, __rvv_float8e4m3mf2_t, float8e4m3,
+	      RVVMF2FP8E4M3, _f8e4m3mf2, _f8e4m3, _e8mf2)
+DEF_RVV_TYPE (vfloat8e4m3m1_t, 20, __rvv_float8e4m3m1_t, float8e4m3,
+	      RVVM1FP8E4M3, _f8e4m3m1, _f8e4m3, _e8m1)
+DEF_RVV_TYPE (vfloat8e4m3m2_t, 20, __rvv_float8e4m3m2_t, float8e4m3,
+	      RVVM2FP8E4M3, _f8e4m3m2, _f8e4m3, _e8m2)
+DEF_RVV_TYPE (vfloat8e4m3m4_t, 20, __rvv_float8e4m3m4_t, float8e4m3,
+	      RVVM4FP8E4M3, _f8e4m3m4, _f8e4m3, _e8m4)
+DEF_RVV_TYPE (vfloat8e4m3m8_t, 20, __rvv_float8e4m3m8_t, float8e4m3,
+	      RVVM8FP8E4M3, _f8e4m3m8, _f8e4m3, _e8m8)
+DEF_RVV_TYPE (vfloat8e5m2mf8_t, 21, __rvv_float8e5m2mf8_t, float8e5m2,
+	      RVVMF8FP8E5M2, _f8e5m2mf8, _f8e5m2, _e8mf8)
+DEF_RVV_TYPE (vfloat8e5m2mf4_t, 21, __rvv_float8e5m2mf4_t, float8e5m2,
+	      RVVMF4FP8E5M2, _f8e5m2mf4, _f8e5m2, _e8mf4)
+DEF_RVV_TYPE (vfloat8e5m2mf2_t, 21, __rvv_float8e5m2mf2_t, float8e5m2,
+	      RVVMF2FP8E5M2, _f8e5m2mf2, _f8e5m2, _e8mf2)
+DEF_RVV_TYPE (vfloat8e5m2m1_t, 20, __rvv_float8e5m2m1_t, float8e5m2,
+	      RVVM1FP8E5M2, _f8e5m2m1, _f8e5m2, _e8m1)
+DEF_RVV_TYPE (vfloat8e5m2m2_t, 20, __rvv_float8e5m2m2_t, float8e5m2,
+	      RVVM2FP8E5M2, _f8e5m2m2, _f8e5m2, _e8m2)
+DEF_RVV_TYPE (vfloat8e5m2m4_t, 20, __rvv_float8e5m2m4_t, float8e5m2,
+	      RVVM4FP8E5M2, _f8e5m2m4, _f8e5m2, _e8m4)
+DEF_RVV_TYPE (vfloat8e5m2m8_t, 20, __rvv_float8e5m2m8_t, float8e5m2,
+	      RVVM8FP8E5M2, _f8e5m2m8, _f8e5m2, _e8m8)
 
 /* Enabled if TARGET_VECTOR_ELEN_BF_16 && (TARGET_ZVFBFMIN or TARGET_ZVFBFWMA).  */
 /* LMUL = 1/4. */

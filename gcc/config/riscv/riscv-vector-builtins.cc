@@ -3683,6 +3683,25 @@ rvv_builtin_types_t builtin_types[NUM_VECTOR_TYPES + 1];
 static GTY (()) vec<registered_function *, va_gc>
   *partition_functions[NUM_RVV_EXT_PARTITIONS];
 
+/* The Zvfofp8min FP8 element type nodes.  Not exposed as user-facing
+   scalar types (no ABI/mangling agreed yet); they exist only so the RVV
+   FP8 vector builtin types have a real float element to bind to,
+   instead of reusing uint8.  GTY-rooted here because nothing else keeps
+   them live until the corresponding vector types are registered.  */
+static GTY (()) tree float8e4m3_type_node;
+static GTY (()) tree float8e5m2_type_node;
+
+/* Lazily build the scalar FP8 element type node for MODE.  */
+static tree
+build_float8_type_node (machine_mode mode)
+{
+  tree type = make_node (REAL_TYPE);
+  TYPE_PRECISION (type) = 8;
+  SET_TYPE_MODE (type, mode);
+  layout_type (type);
+  return type;
+}
+
 /* Return true if TYPE uses fractional LMUL (mf2, mf4, mf8).  */
 static bool
 is_fractional_lmul (vector_type_index type)
@@ -4103,14 +4122,6 @@ register_builtin_types ()
   register_builtin_types_on_null ();
 }
 
-/* Return true if TYPE is an FP8 vector type.  */
-static bool
-float8_vector_type_p (vector_type_index type)
-{
-  return type >= VECTOR_TYPE_vfloat8e4m3mf8_t
-	 && type <= VECTOR_TYPE_vfloat8e5m2m8_t;
-}
-
 /* Similar as register_builtin_types but perform the registration if and
    only if the element of abi_vector_type is NULL_TREE.  */
 static void
@@ -4126,14 +4137,16 @@ register_builtin_types_on_null ()
   tree int32_type_node = get_typenode_from_name (INT32_TYPE);
   tree int64_type_node = get_typenode_from_name (INT64_TYPE);
 
+  if (!float8e4m3_type_node)
+    float8e4m3_type_node = build_float8_type_node (FP8E4M3mode);
+  if (!float8e5m2_type_node)
+    float8e5m2_type_node = build_float8_type_node (FP8E5M2mode);
+
   machine_mode mode;
 #define DEF_RVV_TYPE(NAME, NCHARS, ABI_NAME, SCALAR_TYPE, VECTOR_MODE,         \
 		     ARGS...)                                                  \
   mode = VECTOR_MODE##mode;                                                    \
-  /* FP8 vector types use QI machine modes, so mode availability alone         \
-     does not imply TARGET_ZVFOFP8MIN.  */                                     \
-  if (abi_vector_types[VECTOR_TYPE_##NAME] == NULL_TREE                        \
-      && (!float8_vector_type_p (VECTOR_TYPE_##NAME) || TARGET_ZVFOFP8MIN))    \
+  if (abi_vector_types[VECTOR_TYPE_##NAME] == NULL_TREE)                       \
     register_builtin_type (VECTOR_TYPE_##NAME, SCALAR_TYPE##_type_node, mode);
 
 #define DEF_RVV_TUPLE_TYPE(NAME, NCHARS, ABI_NAME, SUBPART_TYPE, SCALAR_TYPE,  \

@@ -57,6 +57,9 @@ valid_type (unsigned sew, int lmul_log2, bool float_p)
   switch (sew)
     {
     case 8:
+      /* There's no generic (unsuffixed) 8-bit float type -- only the
+	 dedicated float8_e4m3/e5m2 (Zvfofp8min) ones, validated
+	 separately in float8_type() below.  */
       return lmul_log2 >= -3 && !float_p;
     case 16:
       return lmul_log2 >= -2;
@@ -161,8 +164,11 @@ bfloat16_type (int lmul_log2, unsigned nf)
 std::string
 float8_type (const char *fmt, int lmul_log2)
 {
-  /* FP8 vectors use QI machine modes, so use the integer validity check.  */
-  if (!valid_type (8, lmul_log2, /*float_t*/ false))
+  /* Zvfofp8min FP8E4M3/FP8E5M2 real modes go down to mf8, same range
+     as plain 8-bit int -- but unlike int8, there's no generic
+     unsuffixed 8-bit float, so this doesn't share valid_type()'s
+     sew==8 case.  */
+  if (lmul_log2 > 3 || lmul_log2 < -3)
     return "INVALID";
 
   std::stringstream mode;
