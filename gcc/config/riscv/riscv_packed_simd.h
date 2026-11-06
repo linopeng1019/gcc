@@ -195,6 +195,14 @@ RVP_OP_ATTRS rty __riscv_##name (ty __rs1)                                 \
     return (rty)((__rs1 + (__rs1 >> shift)) ^ (__rs1 >> shift));           \
   }
 
+/* Negate in the unsigned type: the spec defines abs (INT_MIN) as INT_MIN,
+   which the signed form above reaches only through signed overflow.  */
+#define RVP_SCALAR_ABS_OP(name, ty, rty)                                   \
+RVP_OP_ATTRS rty __riscv_##name (ty __rs1)                                 \
+  {                                                                        \
+    return __rs1 < 0 ? (rty) 0 - (rty) __rs1 : (rty) __rs1;                \
+  }
+
 #define RVP_ABD_OP(name, ty, rty)                                          \
 RVP_OP_ATTRS rty __riscv_##name (ty __rs1, ty __rs2)                       \
   {                                                                        \
@@ -474,9 +482,9 @@ CREATE_RVP_INTRINSIC (uint32_t, asubu_u32, uint32_t, uint32_t)
 CREATE_RVP_INTRINSIC (int32_t, ssh1sadd_i32, int32_t, int32_t)
 
 /* Scalar Absolute Value.  */
-RVP_ABS_OP (abs_u32, int32_t, uint32_t, 31)
+RVP_SCALAR_ABS_OP (abs_u32, int32_t, uint32_t)
 #if __riscv_xlen == 64
-RVP_ABS_OP (abs_u64, int64_t, uint64_t, 63)
+RVP_SCALAR_ABS_OP (abs_u64, int64_t, uint64_t)
 #endif
 
 /* Scalar Comparison.  */
